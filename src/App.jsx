@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import HeroSection from './sections/HeroSection';
 import VotingDemoSection from './sections/VotingDemoSection';
 import MythRealitySection from './sections/MythRealitySection';
+import HackerModeSection from './sections/HackerModeSection';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
         <HeroSection />
         <VotingDemoSection />
       <MythRealitySection />
+      <HackerModeSection />
       </main>
     </div>
   );
