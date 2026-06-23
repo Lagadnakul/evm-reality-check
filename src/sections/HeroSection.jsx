@@ -140,6 +140,18 @@ const HeroSection = () => {
           {/* LEFT SIDE - Content */}
           <div className="space-y-8">
             {/* Badge */}
+n{/* Research Build Badge - NEW */}
+<motion.div variants={badgeVariants} className="inline-block mb-4">
+<span className="inline-flex items-center px-4 py-2 bg-purple-500/10 backdrop-blur-md rounded-full text-sm font-medium text-purple-300 border border-purple-500/20 shadow-lg">
+<motion.span
+className="w-2 h-2 bg-purple-400 rounded-full mr-2"
+animate={{ opacity: [1, 0.5, 1] }}
+transition={{ duration: 2, repeat: Infinity }}
+/>&nbsp;
+Research Build #001 — Nakul Lagad
+</span>
+</motion.div>
+
             <motion.div variants={badgeVariants} className="inline-block">
               <span className="inline-flex items-center px-4 py-2 bg-white/5 backdrop-blur-md rounded-full text-sm font-medium text-cyan-300 border border-cyan-500/20 shadow-lg">
                 <motion.span
