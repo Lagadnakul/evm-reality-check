@@ -1,75 +1,74 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
-const CodeBlock = ({ code, language = 'python', hasErrors = false, showLineNumbers = true }) => {
+const CodeBlock = ({ code, hasErrors = false }) => {
   const [typingIndex, setTypingIndex] = useState(0);
   const [isTypingComplete, setIsTypingComplete] = useState(false);
-
   const lines = code.split('\n');
+  const errorLines = hasErrors ? [0, 1, 2] : [];
+
+  useEffect(() => {
+    setTypingIndex(0);
+    setIsTypingComplete(false);
+  }, [code]);
 
   useEffect(() => {
     if (typingIndex < code.length) {
-      const timer = setTimeout(() => {
-        setTypingIndex(prev => Math.min(prev + 1, code.length));
-      }, 30);
+      const timer = setTimeout(() => setTypingIndex(p => Math.min(p + 1, code.length)), 28);
       return () => clearTimeout(timer);
-    } else if (!isTypingComplete) {
+    } else {
       setIsTypingComplete(true);
     }
-  }, [typingIndex, code.length, isTypingComplete]);
-
-  const getTokenClass = (line, index) => {
-    return 'text-white';
-  };
-
-  const errorLines = hasErrors ? [0, 1, 2] : [];
+  }, [typingIndex, code.length]);
 
   return (
-    <motion.div
-      className="relative bg-black/20 rounded-lg p-4 border border-white/10 overflow-hidden"
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.4, delay: 0.2 }}
-    >
-      <div className="flex items-center gap-2 mb-4">
-        <span className="text-xs text-gray-500 font-mono">{language}</span>
+    <div className="bg-lift rounded-lg border border-rule overflow-hidden">
+      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-rule">
+        <span className="text-xs text-muted font-mono">python</span>
         {hasErrors && (
-          <span className="text-xs text-red-400 font-mono">3 syntax errors detected</span>
+          <span className="text-xs text-amber font-mono">3 syntax errors detected</span>
+        )}
+        {!hasErrors && isTypingComplete && (
+          <span className="text-xs text-signal font-mono">✓ syntax OK</span>
         )}
       </div>
 
-      <div className="font-mono text-sm leading-relaxed">
+      <div className="p-4 font-mono text-sm leading-relaxed">
         {lines.map((line, lineIndex) => (
           <div key={lineIndex} className="flex gap-4">
-            {showLineNumbers && (
-              <span className="text-gray-500 select-none w-8 text-right">
-                {lineIndex + 1}
-              </span>
-            )}
+            <span className="text-muted/40 select-none w-6 text-right flex-shrink-0 text-xs pt-0.5">
+              {lineIndex + 1}
+            </span>
             <span className="flex-1">
               {line.split('').map((char, charIndex) => {
-                const isVisible = typingIndex >= lineIndex * (line.length + 1) + charIndex;
+                const globalIndex = lines.slice(0, lineIndex).join('\n').length + (lineIndex > 0 ? 1 : 0) + charIndex;
+                const isVisible = typingIndex > globalIndex;
                 const isErrorLine = errorLines.includes(lineIndex);
-
                 return (
                   <motion.span
                     key={charIndex}
-                    className={`${
-                      isErrorLine && char !== ' ' ? 'text-red-400 bg-red-500/10' : 'text-white'
-                    }`}
+                    className={isErrorLine ? 'text-amber/90' : 'text-ink/80'}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: isVisible ? 1 : 0 }}
-                    transition={{ duration: 0.1, delay: lineIndex * 0.1 + charIndex * 0.01 }}
+                    transition={{ duration: 0.06 }}
                   >
                     {char}
                   </motion.span>
                 );
               })}
+              {/* blinking cursor at end of last line */}
+              {lineIndex === lines.length - 1 && !isTypingComplete && (
+                <motion.span
+                  className="inline-block w-2 h-4 bg-signal align-middle ml-px"
+                  animate={{ opacity: [1, 0, 1] }}
+                  transition={{ duration: 0.7, repeat: Infinity }}
+                />
+              )}
             </span>
           </div>
         ))}
       </div>
-    </motion.div>
+    </div>
   );
 };
 
