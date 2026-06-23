@@ -5,6 +5,7 @@ import { Menu, X } from 'lucide-react';
 const navLinks = [
   { label: 'How It Works', href: '#voting-demo' },
   { label: 'Myths', href: '#myth-reality' },
+  { label: 'Hacker Mode', href: '#hacker-mode' },
   { label: 'Security', href: '#security' },
   { label: 'FAQ', href: '#faq' },
 ];

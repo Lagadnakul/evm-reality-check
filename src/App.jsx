@@ -2,6 +2,7 @@ import Navbar from './components/layout/Navbar';
 import HeroSection from './sections/HeroSection';
 import VotingDemoSection from './sections/VotingDemoSection';
 import MythRealitySection from './sections/MythRealitySection';
+import HackerModeSection from './sections/HackerModeSection';
 import SecurityLayersSection from './sections/SecurityLayersSection';
 import FAQSection from './sections/FAQSection';
 import Footer from './sections/Footer';
@@ -14,6 +15,7 @@ function App() {
         <HeroSection />
         <VotingDemoSection />
         <MythRealitySection />
+        <HackerModeSection />
         <SecurityLayersSection />
         <FAQSection />
       </main>
