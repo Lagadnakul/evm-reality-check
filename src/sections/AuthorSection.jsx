@@ -116,7 +116,7 @@ const Certificate = ({ onClose }) => {
               transition={{ delay: 0.6, duration: 0.6 }}
             >
               <span className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-cyan-400 to-purple-400">
-                Certified 3 Syntax Error Hacker
+                Nakul Lagad
               </span>
               <motion.div
                 className="absolute -bottom-2 left-0 right-0 h-1 bg-gradient-to-r from-purple-500/40 to-cyan-500/40"
@@ -493,7 +493,8 @@ const AuthorCard = () => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.8, duration: 0.4 }}
               >
-                Researcher & Developer
+                M.Tech AI & Data Science
+Full Stack + AI Developer
               </motion.p>
             </motion.div>
 
@@ -510,76 +511,10 @@ const AuthorCard = () => {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 1, duration: 0.4 }}
               >
-                Passionate about creating educational experiences that bridge the gap
-                between technology and understanding. This interactive reality check
-                project was developed to help people understand complex systems through
-                hands-on exploration and visualization.
+Built to simplify complex technical concepts through interactive educational experiences.
               </motion.p>
             </motion.div>
 
-            {/* Stats */}
-            <motion.div
-              className="grid grid-cols-3 gap-4"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.1, duration: 0.4 }}
-            >
-              {[
-                { label: 'Projects', value: '100+', color: 'from-cyan-400 to-blue-400' },
-                { label: 'Experience', value: '5+ Years', color: 'from-purple-400 to-pink-400' },
-                { label: 'Focus', value: 'Education', color: 'from-green-400 to-emerald-400' }
-              ].map((stat, index) => (
-                <motion.div
-                  key={index}
-                  className="relative p-4 rounded-2xl glass-card border border-white/10"
-                  custom={index}
-                  variants={statVariants}
-                  initial="hidden"
-                  animate="visible"
-                  whileHover={{ scale: 1.02, y: -3 }}
-                >
-                  <motion.div
-                    className="text-center"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2, duration: 0.3 }}
-                  >
-                    <motion.div
-                      className="w-8 h-8 mx-auto mb-2 rounded-xl bg-gradient-to-br from-white/10 to-white/5 flex items-center justify-center"
-                      whileHover={{ scale: 1.05 }}
-                    >
-                      <motion.span
-                        className="text-lg"
-                        whileHover={{ scale: 1.1 }}
-                      >
-                        {index === 0 ? '📁' : index === 1 ? '⏰' : '🎯'}
-                      </motion.span>
-                    </motion.div>
-                    <motion.h4
-                      className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300"
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.3, duration: 0.3 }}
-                    >
-                      {stat.value}
-                    </motion.h4>
-                    <motion.p
-                      className="text-xs text-gray-400 mt-1"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.4, duration: 0.3 }}
-                    >
-                      {stat.label}
-                    </motion.p>
-                  </motion.div>
-                  <motion.div
-                    className="absolute inset-0 rounded-2xl border border-white/10"
-                    animate={{ borderColor: ['rgba(255, 255, 255, 0.1)', 'rgba(255, 255, 255, 0.3)'] }}
-                    transition={{ duration: 2, repeat: Infinity, delay: index * 0.2 }}
-                  />
-                </motion.div>
-              ))}
-            </motion.div>
 
             {/* Action Buttons */}
             <motion.div
@@ -616,7 +551,7 @@ const AuthorCard = () => {
                 >
                   ⚡
                 </motion.span>
-                <span>View Projects</span>
+                <span>View GitHub</span>
               </motion.button>
             </motion.div>
           </motion.div>
