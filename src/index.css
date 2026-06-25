@@ -341,3 +341,51 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+ /* Hero Section - Reduce EVM machine */
+ .hero-evm-machine {
+ width: 280px !important;
+ height: 350px !important;
+ }
+
+ /* Voting Demo - Stack components */
+ .voting-layout-row {
+ flex-direction: column !important;
+ }
+
+ /* Hide signal lines on mobile */
+ .hidden.lg\:flex {
+ display: none !important;
+ }
+
+ /* Inside The Machine - Stack modules */
+ .machine-modules-container .flex.justify-center.items-center.gap-12 {
+ flex-direction: column;
+ gap: 20px !important;
+ }
+
+ /* Machine Module sizing */
+ .machine-modules-container .w-72.h-96 {
+ width: 280px !important;
+ height: 320px !important;
+ }
+
+ /* Myth vs Reality - Single column */
+ .myth-cards-grid .grid-cols-2 {
+ grid-template-columns: 1fr !important;
+ }
+
+ /* Footer - Stack columns */
+ .footer-grid .grid-cols-4 {
+ grid-template-columns: 1fr !important;
+ gap: 20px !important;
+ }
+
+ /* Author Section - Stack layout */
+ .author-layout .flex-row {
+ flex-direction: column !important;
+ text-align: center !important;
+ }
+}

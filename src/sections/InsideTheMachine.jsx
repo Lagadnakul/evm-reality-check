@@ -1,11 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
+import { ArrowRight } from 'lucide-react';
 
-// ============================================
-// PART 1: MACHINE ANATOMY
-// ============================================
-
-// Machine Module Component
 const MachineModule = ({
   name,
   description,
@@ -13,7 +9,6 @@ const MachineModule = ({
   outputs,
   purpose,
   color,
-  position,
   onClick,
   isActive,
   icon
@@ -21,151 +16,91 @@ const MachineModule = ({
   const moduleRef = useRef(null);
   const isInView = useInView(moduleRef, { once: false, margin: '-100px' });
 
-  const moduleVariants = {
-    hidden: { opacity: 0, y: 50, scale: 0.9 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: { duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }
-    }
-  };
-
-  const hoverVariants = {
-    rest: { scale: 1, y: 0 },
-    hover: { scale: 1.02, y: -5, zIndex: 10 }
-  };
-
   return (
     <motion.div
       ref={moduleRef}
       className="relative"
-      style={{ x: position.x, y: position.y }}
-      variants={moduleVariants}
-      initial="hidden"
-      animate={isInView ? "visible" : "hidden"}
+      initial={{ opacity: 0, y: 40, scale: 0.95 }}
+      animate={isInView ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 40, scale: 0.95 }}
+      transition={{ duration: 0.6 }}
     >
-      {/* Connection Point */}
       <motion.div
-        className="absolute -top-8 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-gradient-to-br from-cyan-500 to-purple-500 border-2 border-white/20"
-        animate={isActive ? {
-          boxShadow: ['0 0 10px rgba(6, 182, 212, 0.5)', '0 0 20px rgba(168, 85, 247, 0.5)']
-        } : { opacity: 0.3 }}
-        transition={{ duration: 1, repeat: Infinity }}
-      />
-
-      {/* Module Card */}
-      <motion.div
-        className={`relative w-72 h-96 rounded-2xl machine-panel-glow border border-${color}-500/20 p-8 cursor-pointer transition-all duration-300`}
+        className="relative w-full max-w-sm min-h-[380px] rounded-2xl border border-white/10 p-7 cursor-pointer overflow-hidden bg-[#111827]/70 backdrop-blur-xl"
         onClick={() => onClick(name)}
-        variants={hoverVariants}
-        whileHover="hover"
-        style={{
-          background: `linear-gradient(145deg, rgba(26, 26, 36, 0.8), rgba(13, 13, 21, 0.8)), linear-gradient(135deg, ${color}/05, ${color}/02)`
-        }}
+        whileHover={{ y: -6, scale: 1.02, borderColor: 'rgba(6,182,212,0.45)' }}
       >
-        {/* Outer Glow */}
         <motion.div
           className="absolute inset-0 rounded-2xl"
           style={{
-            background: `radial-gradient(circle at center, ${color}/10, transparent 70%)`
+            background: `radial-gradient(circle at top, ${color}22, transparent 65%)`
           }}
-          animate={isActive ? { opacity: [0.5, 1, 0.5] } : { opacity: 0.3 }}
+          animate={isActive ? { opacity: [0.45, 0.9, 0.45] } : { opacity: 0.35 }}
           transition={{ duration: 2, repeat: Infinity }}
         />
 
-        {/* Header */}
-        <div className="relative z-10 mb-4">
-          <motion.div
-            className="flex items-center gap-3"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2, duration: 0.4 }}
-          >
+        <div className="relative z-10">
+          <div className="flex items-center justify-between gap-4 mb-5">
+            <div className="flex items-center gap-3">
+              <motion.div
+                className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center border border-white/15"
+                whileHover={{ rotate: [0, 6, -6, 0] }}
+              >
+                <span className="text-2xl">{icon}</span>
+              </motion.div>
+
+              <h3 className="text-xl font-bold text-white" style={{ color }}>
+                {name}
+              </h3>
+            </div>
+
             <motion.div
-              className="w-10 h-10 rounded-xl bg-gradient-to-br from-white/10 to-white/5 flex items-center justify-center border border-white/20"
-              whileHover={{ scale: 1.05, rotate: [0, 5, -5, 0] }}
-              transition={{ duration: 1, repeat: Infinity }}
-            >
-              <span className="text-xl">{icon}</span>
-            </motion.div>
-            <motion.h3
-              className="text-lg font-bold text-white"
-              style={{ color }}
-            >
-              {name}
-            </motion.h3>
-          </motion.div>
+              className="w-3 h-3 rounded-full"
+              style={{ backgroundColor: isActive ? color : 'rgba(255,255,255,0.25)' }}
+              animate={
+                isActive
+                  ? {
+                      boxShadow: [`0 0 10px ${color}`, `0 0 22px ${color}`, `0 0 10px ${color}`],
+                      scale: [1, 1.2, 1]
+                    }
+                  : {}
+              }
+              transition={{ duration: 1.3, repeat: Infinity }}
+            />
+          </div>
 
-          {/* Status Indicator */}
-          <motion.div
-            className="absolute top-0 right-4 w-3 h-3 rounded-full"
-            style={{ backgroundColor: isActive ? color : 'rgba(255, 255, 255, 0.2)' }}
-            animate={isActive ? {
-              boxShadow: [`0 0 10px ${color}`, `0 0 20px ${color}`],
-              scale: [1, 1.1, 1]
-            } : {}}
-            transition={{ duration: 1, repeat: Infinity }}
-          />
-        </div>
+          <div className="h-px w-full bg-gradient-to-r from-transparent via-white/20 to-transparent mb-5" />
 
-        {/* Divider */}
-        <div className="relative z-10 w-full h-0.5 bg-gradient-to-r from-white/10 to-white/20 mb-4" />
-
-        {/* Content */}
-        <div className="relative z-10 space-y-3">
-          <motion.p
-            className="text-sm text-gray-400"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.4 }}
-          >
+          <p className="text-sm text-gray-400 leading-relaxed mb-5">
             {description}
-          </motion.p>
+          </p>
 
-          {/* Info Badges */}
-          <motion.div
-            className="space-y-2"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.4 }}
-          >
-            <motion.div
-              className="flex items-center gap-2 text-xs text-cyan-300"
-              whileHover={{ x: 5 }}
-            >
-              <span className="w-2 h-2 rounded-full bg-cyan-400" />
-              <span>Input: {inputs}</span>
-            </motion.div>
-            <motion.div
-              className="flex items-center gap-2 text-xs text-purple-300"
-              whileHover={{ x: 5 }}
-            >
-              <span className="w-2 h-2 rounded-full bg-purple-400" />
-              <span>Output: {outputs}</span>
-            </motion.div>
-            <motion.div
-              className="flex items-center gap-2 text-xs text-green-300"
-              whileHover={{ x: 5 }}
-            >
-              <span className="w-2 h-2 rounded-full bg-green-400" />
-              <span>Purpose: {purpose}</span>
-            </motion.div>
-          </motion.div>
+          <div className="space-y-3">
+            <div className="rounded-xl bg-cyan-500/5 border border-cyan-400/10 p-3">
+              <p className="text-xs text-cyan-300 font-semibold mb-1">Input</p>
+              <p className="text-xs text-gray-300 leading-relaxed">{inputs}</p>
+            </div>
+
+            <div className="rounded-xl bg-purple-500/5 border border-purple-400/10 p-3">
+              <p className="text-xs text-purple-300 font-semibold mb-1">Output</p>
+              <p className="text-xs text-gray-300 leading-relaxed">{outputs}</p>
+            </div>
+
+            <div className="rounded-xl bg-green-500/5 border border-green-400/10 p-3">
+              <p className="text-xs text-green-300 font-semibold mb-1">Purpose</p>
+              <p className="text-xs text-gray-300 leading-relaxed">{purpose}</p>
+            </div>
+          </div>
         </div>
 
-
-        {/* Corner Accents */}
-        <div className="absolute -top-1 -left-1 w-3 h-3 border-l-2 border-t-2 border-cyan-500/30 rounded-br" />
-        <div className="absolute -bottom-1 -left-1 w-3 h-3 border-l-2 border-b-2 border-cyan-500/30 rounded-tr" />
-        <div className="absolute -top-1 -right-1 w-3 h-3 border-r-2 border-t-2 border-purple-500/30 rounded-bl" />
-        <div className="absolute -bottom-1 -right-1 w-3 h-3 border-r-2 border-b-2 border-purple-500/30 rounded-tl" />
+        <div className="absolute -top-1 -left-1 w-4 h-4 border-l-2 border-t-2 border-cyan-500/40 rounded-br" />
+        <div className="absolute -bottom-1 -left-1 w-4 h-4 border-l-2 border-b-2 border-cyan-500/40 rounded-tr" />
+        <div className="absolute -top-1 -right-1 w-4 h-4 border-r-2 border-t-2 border-purple-500/40 rounded-bl" />
+        <div className="absolute -bottom-1 -right-1 w-4 h-4 border-r-2 border-b-2 border-purple-500/40 rounded-tl" />
       </motion.div>
     </motion.div>
   );
 };
 
-// Machine Anatomy Section
 const MachineAnatomy = ({ activeModule, onModuleClick }) => {
   const containerRef = useRef(null);
   const isInView = useInView(containerRef, { once: false, margin: '-100px' });
@@ -173,33 +108,30 @@ const MachineAnatomy = ({ activeModule, onModuleClick }) => {
   const modules = [
     {
       name: 'Ballot Unit',
-      description: 'The primary interface where voters make their selection. Displays candidate information and captures vote choices.',
-      inputs: 'Voter Interaction, Touch Input',
-      outputs: 'Vote Selection Data',
-      purpose: 'Capture and validate voter choices',
-      color: 'rgba(6, 182, 212)',
-      icon: '🗳️',
-      position: { x: -200, y: 0 }
+      description: 'The voter-facing interface where selections are made. It displays candidate information and captures the voter choice.',
+      inputs: 'Voter interaction',
+      outputs: 'Vote selection data',
+      purpose: 'Capture voter choice',
+      color: 'rgba(6, 182, 212, 1)',
+      icon: '🗳️'
     },
     {
       name: 'Control Unit',
-      description: 'The administrative module that manages ballot activation, verifies polling officer credentials, and controls the voting session.',
-      inputs: 'Officer Authentication, Session Parameters',
-      outputs: 'Ballot Activation, Session Control',
-      purpose: 'Manage voting session and authentication',
-      color: 'rgba(168, 85, 247)',
-      icon: '🎛️',
-      position: { x: 0, y: 0 }
+      description: 'The administrative module that manages ballot activation, session control, and polling officer workflow.',
+      inputs: 'Officer activation',
+      outputs: 'Ballot enable signal',
+      purpose: 'Control one voting session',
+      color: 'rgba(168, 85, 247, 1)',
+      icon: '🎛️'
     },
     {
       name: 'Verification Window',
-      description: 'VVPAT-style concept that provides voters with a physical or visual confirmation of their vote before final submission.',
-      inputs: 'Vote Data, Confirmation Request',
-      outputs: 'Verified Vote Record, Voter Confirmation',
-      purpose: 'Enable voter verification and audit trail',
-      color: 'rgba(16, 185, 129)',
-      icon: '👁️',
-      position: { x: 200, y: 0 }
+      description: 'A VVPAT-style concept that helps the voter visually verify their selected choice in this educational demo.',
+      inputs: 'Selected vote data',
+      outputs: 'Verification display',
+      purpose: 'Support transparent verification',
+      color: 'rgba(16, 185, 129, 1)',
+      icon: '👁️'
     }
   ];
 
@@ -211,99 +143,39 @@ const MachineAnatomy = ({ activeModule, onModuleClick }) => {
       animate={{ opacity: isInView ? 1 : 0 }}
       transition={{ duration: 0.6 }}
     >
-      {/* Background Connection Lines */}
-      <svg
-        className="absolute inset-0 w-full h-full -z-20"
-        viewBox="0 0 800 400"
-        preserveAspectRatio="none"
-      >
-        {/* Connection lines between modules */}
-        <motion.path
-          d="M 200 200 Q 400 100 600 200"
-          fill="none"
-          stroke="rgba(6, 182, 212, 0.1)"
-          strokeWidth="2"
-          animate={activeModule ? {
-            stroke: ['rgba(6, 182, 212, 0.1)', 'rgba(6, 182, 212, 0.3)']
-          } : {}}
-          transition={{ duration: 2, repeat: Infinity }}
-        />
-        <motion.path
-          d="M 400 200 Q 400 300 400 400"
-          fill="none"
-          stroke="rgba(168, 85, 247, 0.1)"
-          strokeWidth="2"
-          animate={activeModule ? {
-            stroke: ['rgba(168, 85, 247, 0.1)', 'rgba(168, 85, 247, 0.3)']
-          } : {}}
-          transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
-        />
-        <motion.path
-          d="M 600 200 Q 400 100 200 200"
-          fill="none"
-          stroke="rgba(16, 185, 129, 0.1)"
-          strokeWidth="2"
-          animate={activeModule ? {
-            stroke: ['rgba(16, 185, 129, 0.1)', 'rgba(16, 185, 129, 0.3)']
-          } : {}}
-          transition={{ duration: 2, repeat: Infinity, delay: 1 }}
-        />
-      </svg>
-
-      {/* Modules Container */}
-      <div className="relative flex justify-center items-center gap-12">
-        {modules.map((module, index) => (
-          <MachineModule
-            key={index}
-            {...module}
-            onClick={onModuleClick}
-            isActive={activeModule === module.name}
-          />
-        ))}
-      </div>
-
-      {/* Section Title */}
-      <motion.div
-        className="text-center mb-8"
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.6 }}
-      >
-        <motion.span
-          className="inline-block px-4 py-1.5 bg-white/5 backdrop-blur-md rounded-full text-sm font-medium text-cyan-300 border border-cyan-500/20 mb-4"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.3 }}
-        >
+      <motion.div className="text-center mb-12">
+        <span className="inline-block px-4 py-1.5 bg-white/5 backdrop-blur-md rounded-full text-sm font-medium text-cyan-300 border border-cyan-500/20 mb-4">
           Interactive System Diagram
-        </motion.span>
-        <motion.h2
-          className="text-4xl md:text-5xl font-bold text-white"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-        >
+        </span>
+
+        <h2 className="text-4xl md:text-5xl font-bold text-white">
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-white to-purple-400">
             Machine Anatomy
           </span>
-        </motion.h2>
-        <motion.p
-          className="text-lg text-gray-400 mt-4 max-w-2xl mx-auto"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-        >
+        </h2>
+
+        <p className="text-lg text-gray-400 mt-4 max-w-2xl mx-auto">
           Explore the three main components of a simplified EVM-style voting system.
-          Click on each module to learn about its function, inputs, outputs, and purpose.
-        </motion.p>
+        </p>
       </motion.div>
+
+      <div className="relative max-w-7xl mx-auto px-4">
+        <div className="absolute hidden lg:block top-1/2 left-[20%] right-[20%] h-px bg-gradient-to-r from-cyan-400/20 via-purple-400/30 to-green-400/20 -z-10" />
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {modules.map((module) => (
+            <MachineModule
+              key={module.name}
+              {...module}
+              onClick={onModuleClick}
+              isActive={activeModule === module.name}
+            />
+          ))}
+        </div>
+      </div>
     </motion.div>
   );
 };
-
-// ============================================
-// PART 2: VOTE JOURNEY VISUALIZATION
-// ============================================
 
 const VoteJourneyVisualization = () => {
   const containerRef = useRef(null);
@@ -319,34 +191,6 @@ const VoteJourneyVisualization = () => {
     { id: 7, name: 'Completion', description: 'Vote casting complete', icon: '✓' }
   ];
 
-  const stageVariants = {
-    hidden: { opacity: 0, y: 50, scale: 0.8 },
-    visible: (i) => ({
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: { delay: i * 0.1, duration: 0.6, ease: 'easeOut' }
-    })
-  };
-
-  const lineVariants = {
-    hidden: { pathLength: 0, opacity: 0 },
-    visible: {
-      pathLength: 1,
-      opacity: 1,
-      transition: { duration: 1, delay: 0.5, ease: 'easeInOut' }
-    }
-  };
-
-  const dotVariants = {
-    hidden: { opacity: 0, scale: 0.5 },
-    visible: (i) => ({
-      opacity: 1,
-      scale: 1,
-      transition: { delay: 0.5 + i * 0.1, duration: 0.4, ease: 'easeOut' }
-    })
-  };
-
   return (
     <motion.div
       ref={containerRef}
@@ -355,195 +199,113 @@ const VoteJourneyVisualization = () => {
       animate={{ opacity: isInView ? 1 : 0 }}
       transition={{ duration: 0.6 }}
     >
-      <div className="max-w-6xl mx-auto px-4">
-        {/* Section Title */}
-        <motion.div
-          className="text-center mb-12"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.6 }}
-        >
-          <motion.span
-            className="inline-block px-4 py-1.5 bg-white/5 backdrop-blur-md rounded-full text-sm font-medium text-purple-300 border border-purple-500/20 mb-4"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3 }}
-          >
+      <div className="max-w-7xl mx-auto px-4">
+        <motion.div className="text-center mb-14">
+          <span className="inline-block px-4 py-1.5 bg-white/5 backdrop-blur-md rounded-full text-sm font-medium text-purple-300 border border-purple-500/20 mb-4">
             Vote Journey
-          </motion.span>
-          <motion.h2
-            className="text-4xl md:text-5xl font-bold text-white"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-          >
+          </span>
+
+          <h2 className="text-4xl md:text-5xl font-bold text-white">
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-white to-cyan-400">
               The Vote Journey
             </span>
-          </motion.h2>
-          <motion.p
-            className="text-lg text-gray-400 mt-4 max-w-2xl mx-auto"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-          >
+          </h2>
+
+          <p className="text-lg text-gray-400 mt-4 max-w-2xl mx-auto">
             Follow the complete path of a vote from initial contact to final confirmation.
-          </motion.p>
+          </p>
         </motion.div>
 
-        {/* Timeline */}
-        <div className="relative">
-          {/* Horizontal Timeline Line */}
-          <motion.div
-            className="absolute top-1/2 left-0 right-0 h-1 -z-10"
-            initial={{ scaleX: 0 }}
-            animate={{ scaleX: isInView ? 1 : 0 }}
-            transition={{ delay: 0.6, duration: 1, ease: 'easeInOut' }}
-          >
-            <motion.div
-              className="h-full bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-cyan-500/20"
-              animate={{ backgroundPosition: ['0% 0%', '100% 0%', '0% 0%'] }}
-              transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
-              style={{ backgroundSize: '200% auto' }}
-            />
-          </motion.div>
-
-          {/* Flow Animation */}
-          <motion.div
-            className="absolute top-1/2 left-0 right-0 h-1 -z-10"
-            animate={{
-              background: [
-                'linear-gradient(90deg, transparent, rgba(6, 182, 212, 0), transparent)',
-                'linear-gradient(90deg, transparent, rgba(6, 182, 212, 0.4), transparent)',
-                'linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.4), transparent)',
-                'linear-gradient(90deg, transparent, rgba(6, 182, 212, 0), transparent)'
-              ]
-            }}
-            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-          />
-
-          {/* Stages */}
-          <div className="flex justify-between items-center">
+        <div className="overflow-x-auto pb-6">
+          <div className="min-w-[1120px] flex items-start justify-between gap-4 px-2">
             {stages.map((stage, index) => (
-              <motion.div
-                key={stage.id}
-                className="flex flex-col items-center text-center"
-                custom={index}
-                variants={stageVariants}
-                initial="hidden"
-                animate={isInView ? "visible" : "hidden"}
-              >
-n  <motion.div
-    className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500/20 to-purple-500/20 flex items-center justify-center border border-white/20"
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ delay: index * 0.1, duration: 0.4 }}
-    whileHover={{ scale: 1.05 }}
-  >
-    <motion.span
-      className="text-xl"
-      animate={{ rotate: [0, 10, -10, 0] }}
-      transition={{ duration: 4, repeat: Infinity, delay: index * 0.2 }}
-    >
-      {stage.icon}
-    </motion.span>
-  </motion.div>
-                </motion.div>
-
-                {/* Stage Label */}
+              <React.Fragment key={stage.id}>
                 <motion.div
-                  className="mt-4 text-center"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.7 + index * 0.1, duration: 0.4 }}
+                  className="w-36 flex flex-col items-center text-center"
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: isInView ? 1 : 0, y: isInView ? 0 : 30 }}
+                  transition={{ delay: index * 0.08, duration: 0.45 }}
                 >
-                  <motion.h4
-                    className="text-lg font-bold text-white"
-                    whileHover={{ color: 'rgba(168, 85, 247, 1)' }}
+                  <motion.div
+                    className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-purple-500/20 flex items-center justify-center border border-white/20 shadow-lg shadow-cyan-500/10"
+                    whileHover={{ scale: 1.08, y: -4 }}
                   >
+                    <span className="text-2xl">{stage.icon}</span>
+                  </motion.div>
+
+                  <h4 className="mt-4 text-base font-bold text-white leading-tight min-h-[40px] flex items-center">
                     {stage.name}
-                  </motion.h4>
-                  <motion.p
-                    className="text-sm text-gray-400 mt-1"
-                    whileHover={{ color: 'rgba(255, 255, 255, 0.8)' }}
-                  >
+                  </h4>
+
+                  <p className="mt-2 text-sm text-gray-400 leading-relaxed min-h-[46px]">
                     {stage.description}
-                  </motion.p>
+                  </p>
+
+                  <div className="mt-4 px-4 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/20 text-xs text-cyan-300 font-mono">
+                    Step {stage.id}
+                  </div>
                 </motion.div>
 
-                {/* Position Number */}
-                <motion.div
-                  className="absolute -bottom-8 text-xs text-cyan-300 font-mono"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: [0.5, 1, 0.5] }}
-                  transition={{ duration: 2, repeat: Infinity, delay: 1 + index * 0.2 }}
-                >
-                  Step {stage.id}
-                </motion.div>
-              </motion.div>
+                {index < stages.length - 1 && (
+                  <motion.div
+                    className="pt-4 flex items-center justify-center text-cyan-300"
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: isInView ? 1 : 0, x: isInView ? 0 : -10 }}
+                    transition={{ delay: 0.35 + index * 0.08, duration: 0.4 }}
+                  >
+                    <motion.div
+                      animate={{ x: [0, 7, 0] }}
+                      transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
+                      className="w-10 h-10 rounded-full bg-white/5 border border-cyan-400/20 flex items-center justify-center"
+                    >
+                      <ArrowRight size={22} />
+                    </motion.div>
+                  </motion.div>
+                )}
+              </React.Fragment>
             ))}
           </div>
-
         </div>
       </div>
     </motion.div>
   );
 };
 
-// ============================================
-// PART 3: SECURITY LAYERS VISUALIZATION
-// ============================================
-
 const SecurityLayersVisualization = () => {
   const containerRef = useRef(null);
   const isInView = useInView(containerRef, { once: false, margin: '-100px' });
-
   const [expandedLayer, setExpandedLayer] = useState(null);
 
   const layers = [
     {
       id: 1,
       name: 'Physical Controls',
-      description: 'Hardware-level protections including tamper-evident seals, secure enclosures, and access controls that prevent unauthorized physical access to critical components.',
+      description: 'Hardware-level protections including sealed enclosures, controlled access, and supervised handling.',
       color: 'from-orange-400 to-red-400',
       icon: '🔒'
     },
     {
       id: 2,
       name: 'Operational Procedures',
-      description: 'Strict protocols and workflows that govern how the system is used, including multi-person verification, chain of custody, and standardized procedures for setup, operation, and shutdown.',
+      description: 'Defined workflows for setup, activation, voting, shutdown, and custody of the system.',
       color: 'from-blue-400 to-cyan-400',
       icon: '📋'
     },
     {
       id: 3,
       name: 'Verification Mechanisms',
-      description: 'Technical systems that allow voters to verify their choices before final submission, including VVPAT slips, digital receipts, and real-time confirmation displays.',
+      description: 'Processes that help confirm the voter choice and support transparent verification.',
       color: 'from-green-400 to-emerald-400',
       icon: '🔍'
     },
     {
       id: 4,
       name: 'Audit Processes',
-      description: 'Comprehensive audit trails and post-election procedures including manual counts, random sampling, digital logs, and independent verification to ensure result accuracy.',
+      description: 'Post-process verification, audit trails, and review procedures that help validate outcomes.',
       color: 'from-purple-400 to-pink-400',
       icon: '📊'
     }
   ];
-
-  const layerVariants = {
-    hidden: { opacity: 0, y: 50 },
-    visible: (i) => ({
-      opacity: 1,
-      y: 0,
-      transition: { delay: i * 0.15, duration: 0.6, ease: 'easeOut' }
-    })
-  };
-
-  const cardVariants = {
-    collapsed: { height: 'auto', opacity: 1 },
-    expanded: { height: 'auto', opacity: 1 }
-  };
 
   return (
     <motion.div
@@ -554,309 +316,105 @@ const SecurityLayersVisualization = () => {
       transition={{ duration: 0.6 }}
     >
       <div className="max-w-6xl mx-auto px-4">
-        {/* Section Title */}
-        <motion.div
-          className="text-center mb-12"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.6 }}
-        >
-          <motion.span
-            className="inline-block px-4 py-1.5 bg-white/5 backdrop-blur-md rounded-full text-sm font-medium text-green-300 border border-green-500/20 mb-4"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3 }}
-          >
+        <motion.div className="text-center mb-12">
+          <span className="inline-block px-4 py-1.5 bg-white/5 backdrop-blur-md rounded-full text-sm font-medium text-green-300 border border-green-500/20 mb-4">
             Security Architecture
-          </motion.span>
-          <motion.h2
-            className="text-4xl md:text-5xl font-bold text-white"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-          >
+          </span>
+
+          <h2 className="text-4xl md:text-5xl font-bold text-white">
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-white to-cyan-400">
               Security Layers
             </span>
-          </motion.h2>
-          <motion.p
-            className="text-lg text-gray-400 mt-4 max-w-2xl mx-auto"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-          >
-            Multiple layers of protection work together to ensure system integrity.
-            Click on each layer to expand and learn more.
-          </motion.p>
+          </h2>
+
+          <p className="text-lg text-gray-400 mt-4 max-w-2xl mx-auto">
+            Multiple layers work together: technology, physical controls, procedures, and verification.
+          </p>
         </motion.div>
 
-        {/* Layers Stack */}
-        <div className="relative">
+        <div className="space-y-5">
           {layers.map((layer, index) => (
             <motion.div
               key={layer.id}
-              className="relative mb-6"
-              custom={index}
-              variants={layerVariants}
-              initial="hidden"
-              animate={isInView ? "visible" : "hidden"}
+              className={`relative w-full max-w-3xl mx-auto rounded-2xl border border-white/10 overflow-hidden bg-white/[0.04] backdrop-blur-xl ${
+                expandedLayer === layer.id ? 'ring-2 ring-cyan-500/30' : ''
+              }`}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: isInView ? 1 : 0, y: isInView ? 0 : 30 }}
+              transition={{ delay: index * 0.1, duration: 0.5 }}
+              onClick={() => setExpandedLayer(expandedLayer === layer.id ? null : layer.id)}
+              whileHover={{ scale: 1.01, borderColor: 'rgba(6,182,212,0.35)' }}
             >
-              {/* Layer Card */}
-              <motion.div
-                className={`relative w-full max-w-3xl mx-auto rounded-2xl glass-card border border-white/10 overflow-hidden ${expandedLayer === layer.id ? 'ring-2 ring-cyan-500/30' : ''}`}
-                onClick={() => setExpandedLayer(expandedLayer === layer.id ? null : layer.id)}
-                whileHover={{ scale: 1.01, borderColor: 'rgba(6, 182, 212, 0.3)' }}
-                transition={{ duration: 0.3 }}
-              >
-                {/* Layer Header */}
+              <div className={`flex items-center gap-4 p-6 bg-gradient-to-r ${layer.color} bg-opacity-10`}>
+                <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center border border-white/20">
+                  <span className="text-2xl">{layer.icon}</span>
+                </div>
+
+                <h3 className="text-xl font-bold text-white">
+                  Layer {layer.id}: {layer.name}
+                </h3>
+
+                <div className="ml-auto w-8 h-8 rounded-full bg-white/10 flex items-center justify-center border border-white/15 text-white">
+                  {expandedLayer === layer.id ? '−' : '+'}
+                </div>
+              </div>
+
+              {expandedLayer === layer.id && (
                 <motion.div
-                  className={`flex items-center gap-4 p-6 bg-gradient-to-r ${layer.color}/10`}
-                  style={{ borderBottom: `1px solid ${layer.color.replace('from-', '').replace(' to-', '').replace('-400', '')}/20` }}
+                  className="p-6 border-t border-white/10"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
                 >
-                  <motion.div
-                    className="w-12 h-12 rounded-xl bg-gradient-to-br from-white/10 to-white/5 flex items-center justify-center border border-white/20"
-                    whileHover={{ scale: 1.05, rotate: [0, 5, -5, 0] }}
-                    transition={{ duration: 1, repeat: Infinity }}
-                  >
-                    <span className="text-2xl">{layer.icon}</span>
-                  </motion.div>
-                  <motion.h3
-                    className="text-xl font-bold text-white"
-                    whileHover={{ x: 5 }}
-                  >
-                    Layer {layer.id}: {layer.name}
-                  </motion.h3>
-                  <motion.div
-                    className="ml-auto w-8 h-8 rounded-full flex items-center justify-center"
-                    style={{
-                      background: `linear-gradient(135deg, ${layer.color.replace('from-', '').replace(' to-', '').replace('-400', '')}/20)`
-                    }}
-                    animate={expandedLayer === layer.id ? { rotate: 180 } : { rotate: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <motion.span
-                      className="text-white"
-                      animate={{ scale: [1, 1.1, 1] }}
-                      transition={{ duration: 1, repeat: Infinity }}
-                    >
-                      {expandedLayer === layer.id ? '−' : '+'}
-                    </motion.span>
-                  </motion.div>
+                  <p className="text-gray-300 leading-relaxed">{layer.description}</p>
                 </motion.div>
-
-                {/* Layer Content */}
-                {expandedLayer === layer.id && (
-                  <motion.div
-                    className="p-6"
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    transition={{ duration: 0.4, ease: 'easeInOut' }}
-                  >
-                    <motion.p
-                      className="text-gray-300 leading-relaxed"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.1, duration: 0.3 }}
-                    >
-                      {layer.description}
-                    </motion.p>
-
-                    {/* Layer Visualization */}
-                    <motion.div
-                      className="mt-6 h-32 rounded-xl bg-gradient-to-r from-white/5 to-transparent border border-white/10 flex items-center justify-center"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.2, duration: 0.3 }}
-                    >
-                      <motion.div
-                        className="w-full max-w-md h-20 relative"
-                        animate={{ opacity: [0.5, 1, 0.5] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                      >
-                        {/* Animated bars representing layer activity */}
-                        {[...Array(8)].map((_, i) => (
-                          <motion.div
-                            key={i}
-                            className="absolute bottom-0 w-2 rounded-full"
-                            style={{
-                              left: `${i * 16}%`,
-                              height: `${20 + Math.random() * 60}%`,
-                              background: `linear-gradient(to top, ${layer.color.replace('from-', '').replace(' to-', '').replace('-400', '')}, ${layer.color.replace('from-', '').replace(' to-', '').replace('-400', '')}/40)`
-                            }}
-                            animate={{ height: [`${20 + Math.random() * 60}%`, `${40 + Math.random() * 40}%`] }}
-                            transition={{ duration: 1 + Math.random() * 2, repeat: Infinity, delay: i * 0.1 }}
-                          />
-                        ))}
-                      </motion.div>
-                    </motion.div>
-
-                    {/* Learning Points */}
-                    <motion.div
-                      className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.3, duration: 0.3 }}
-                    >
-                      {[
-                        { title: 'Prevention', desc: 'Stops threats before they reach the system' },
-                        { title: 'Detection', desc: 'Identifies anomalies and potential issues' },
-                        { title: 'Response', desc: 'Provides recovery and correction mechanisms' }
-                      ].map((point, i) => (
-                        <motion.div
-                          key={i}
-                          className="p-4 rounded-xl bg-white/5 border border-white/10"
-                          whileHover={{ scale: 1.02, borderColor: 'rgba(6, 182, 212, 0.3)' }}
-                        >
-                          <motion.h4
-                            className="text-sm font-semibold text-cyan-300 mb-1"
-                            whileHover={{ color: 'rgba(168, 85, 247, 1)' }}
-                          >
-                            {point.title}
-                          </motion.h4>
-                          <motion.p
-                            className="text-xs text-gray-400"
-                            whileHover={{ color: 'rgba(255, 255, 255, 0.8)' }}
-                          >
-                            {point.desc}
-                          </motion.p>
-                        </motion.div>
-                      ))}
-                    </motion.div>
-                  </motion.div>
-                )}
-
-                {/* Layer Number Badge */}
-                <motion.div
-                  className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.4, duration: 0.3 }}
-                >
-                  <motion.span
-                    className="text-sm font-bold text-white"
-                    whileHover={{ scale: 1.1 }}
-                  >
-                    {layer.id}
-                  </motion.span>
-                </motion.div>
-
-                {/* Corner Accents */}
-                <div className="absolute -top-1 -left-1 w-3 h-3 border-l-2 border-t-2 border-cyan-500/30 rounded-br" />
-                <div className="absolute -bottom-1 -left-1 w-3 h-3 border-l-2 border-b-2 border-cyan-500/30 rounded-tr" />
-                <div className="absolute -top-1 -right-1 w-3 h-3 border-r-2 border-t-2 border-purple-500/30 rounded-bl" />
-                <div className="absolute -bottom-1 -right-1 w-3 h-3 border-r-2 border-b-2 border-purple-500/30 rounded-tl" />
-              </motion.div>
+              )}
             </motion.div>
           ))}
-
-          {/* Stack Visualization */}
-          <motion.div
-            className="absolute right-0 top-0 bottom-0 w-32 hidden lg:flex flex-col justify-center"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 1, duration: 0.6 }}
-          >
-            <motion.div
-              className="relative w-full h-64"
-              animate={{ y: [0, -5, 0] }}
-              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-            >
-              {layers.map((layer, index) => (
-                <motion.div
-                  key={layer.id}
-                  className="relative w-full h-12 rounded-lg mb-2"
-                  style={{
-                    background: `linear-gradient(135deg, ${layer.color.replace('from-', '').replace(' to-', '').replace('-400', '')}/20)`
-                  }}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 1.2 + index * 0.1, duration: 0.4 }}
-                  whileHover={{ scale: 1.02, x: -5 }}
-                >
-                  <motion.div
-                    className="absolute inset-0 rounded-lg border border-white/20"
-                    animate={{ borderColor: ['rgba(255, 255, 255, 0.1)', 'rgba(255, 255, 255, 0.3)'] }}
-                    transition={{ duration: 2, repeat: Infinity, delay: index * 0.2 }}
-                  />
-                  <motion.span
-                    className="absolute left-2 top-1/2 -translate-y-1/2 text-xs font-bold text-white"
-                    whileHover={{ scale: 1.05 }}
-                  >
-                    {layer.name}
-                  </motion.span>
-                </motion.div>
-              ))}
-            </motion.div>
-          </motion.div>
         </div>
       </div>
     </motion.div>
   );
 };
 
-// ============================================
-// PART 4: TECHNOLOGY VS ASSUMPTIONS
-// ============================================
-
 const TechnologyVsAssumptions = () => {
   const containerRef = useRef(null);
   const isInView = useInView(containerRef, { once: false, margin: '-100px' });
-
   const [activeCard, setActiveCard] = useState(null);
 
   const comparisonCards = [
     {
       id: 1,
       claim: '"The machine can be hacked with a simple Python script."',
-      check: '❌ Not accurate',
-      evidence: 'Real systems have multiple security layers beyond just software',
-      explanation: 'Understanding a system requires knowledge of its architecture, communication protocols, physical security, and operational procedures - not just programming skills.',
-      category: 'Systems Thinking',
-      color: 'from-red-400 to-rose-400'
+      check: 'Not accurate',
+      evidence: 'Real systems involve hardware, procedures, physical access, and verification layers.',
+      explanation: 'Programming is useful, but understanding real-world systems requires architecture, process, and security knowledge.',
+      category: 'Systems Thinking'
     },
     {
       id: 2,
-      claim: '"If it has a computer chip, it must be connected to the internet."',
-      check: '❌ False assumption',
-      evidence: 'Many embedded systems operate in isolated environments',
-      explanation: 'Embedded systems often use dedicated communication channels, direct connections, or operate completely offline. Connectivity varies based on system design and security requirements.',
-      category: 'Technical Accuracy',
-      color: 'from-blue-400 to-cyan-400'
+      claim: '"Every electronic machine is connected to the internet."',
+      check: 'False assumption',
+      evidence: 'Many embedded systems operate without public network connectivity.',
+      explanation: 'Connectivity depends on system design. Not every device works like a phone, website, or cloud app.',
+      category: 'Technical Accuracy'
     },
     {
       id: 3,
-      claim: '"Voting machines use the same technology as ATMs or smartphones."',
-      check: '⚠️ Over-simplification',
-      evidence: 'Purpose-built systems have different design priorities',
-      explanation: 'While they may share some components, voting systems are designed with different priorities: security, auditability, and reliability over an extended period, rather than connectivity and user experience.',
-      category: 'Technical Understanding',
-      color: 'from-yellow-400 to-orange-400'
+      claim: '"If I know coding, I can hack anything."',
+      check: 'Oversimplified',
+      evidence: 'Security involves networks, hardware, operating systems, protocols, and physical controls.',
+      explanation: 'A single script is not the same as understanding a complete system.',
+      category: 'Security Basics'
     },
     {
       id: 4,
-      claim: '"Security through obscurity works if nobody knows how it works."',
-      check: '❌ Security principle violation',
-      evidence: 'Kerckhoffs\'s principle: security should rely on keys, not secrecy',
-      explanation: 'Modern security best practices require that systems be secure even when their design is publicly known. True security comes from robust implementation, not hiding how things work.',
-      category: 'Security Principles',
-      color: 'from-green-400 to-emerald-400'
+      claim: '"Security is only software."',
+      check: 'Incomplete',
+      evidence: 'Operational processes and physical controls are also important.',
+      explanation: 'Real systems combine technology, people, procedures, and verification.',
+      category: 'Security Layers'
     }
   ];
-
-  const cardVariants = {
-    hidden: { opacity: 0, y: 50, rotate: -5 },
-    visible: (i) => ({
-      opacity: 1,
-      y: 0,
-      rotate: 0,
-      transition: { delay: i * 0.15, duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }
-    })
-  };
-
-  const hoverVariants = {
-    rest: { scale: 1, y: 0 },
-    hover: { scale: 1.03, y: -5, zIndex: 10 }
-  };
 
   return (
     <motion.div
@@ -867,438 +425,158 @@ const TechnologyVsAssumptions = () => {
       transition={{ duration: 0.6 }}
     >
       <div className="max-w-7xl mx-auto px-4">
-        {/* Section Title */}
-        <motion.div
-          className="text-center mb-12"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.6 }}
-        >
-          <motion.span
-            className="inline-block px-4 py-1.5 bg-white/5 backdrop-blur-md rounded-full text-sm font-medium text-yellow-300 border border-yellow-500/20 mb-4"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3 }}
-          >
+        <motion.div className="text-center mb-12">
+          <span className="inline-block px-4 py-1.5 bg-white/5 backdrop-blur-md rounded-full text-sm font-medium text-yellow-300 border border-yellow-500/20 mb-4">
             Critical Thinking
-          </motion.span>
-          <motion.h2
-            className="text-4xl md:text-5xl font-bold text-white"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-          >
+          </span>
+
+          <h2 className="text-4xl md:text-5xl font-bold text-white">
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-white to-orange-400">
               Technology vs Assumptions
             </span>
-          </motion.h2>
-          <motion.p
-            className="text-lg text-gray-400 mt-4 max-w-2xl mx-auto"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-          >
-            Educational concept comparison focusing on systems thinking and technology understanding.
-            Examine common assumptions and check them against technical realities.
-          </motion.p>
+          </h2>
+
+          <p className="text-lg text-gray-400 mt-4 max-w-2xl mx-auto">
+            Examine common assumptions and compare them with systems thinking.
+          </p>
         </motion.div>
 
-        {/* Cards Grid */}
-        <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 gap-6"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6, duration: 0.6 }}
-        >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {comparisonCards.map((card, index) => (
             <motion.div
               key={card.id}
-              className="relative"
-              custom={index}
-              variants={cardVariants}
-              initial="hidden"
-              animate={isInView ? "visible" : "hidden"}
+              className={`relative rounded-2xl border border-white/10 overflow-hidden bg-white/[0.04] backdrop-blur-xl ${
+                activeCard === card.id ? 'ring-2 ring-cyan-500/30' : ''
+              }`}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: isInView ? 1 : 0, y: isInView ? 0 : 30 }}
+              transition={{ delay: index * 0.1, duration: 0.5 }}
+              onClick={() => setActiveCard(activeCard === card.id ? null : card.id)}
+              whileHover={{ y: -5, scale: 1.02 }}
             >
-              {/* Card */}
-              <motion.div
-                className={`relative rounded-2xl glass-card border border-white/10 overflow-hidden ${activeCard === card.id ? 'ring-2 ring-cyan-500/30' : ''}`}
-                onClick={() => setActiveCard(activeCard === card.id ? null : card.id)}
-                variants={hoverVariants}
-                initial="rest"
-                whileHover="hover"
-              >
-                {/* Card Header */}
-                <motion.div
-                  className={`p-6 bg-gradient-to-r ${card.color}/10`}
-                  style={{ borderBottom: `1px solid ${card.color.replace('from-', '').replace(' to-', '').replace('-400', '')}/20` }}
-                >
+              <div className="p-6 border-b border-white/10">
+                <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-cyan-500/10 text-cyan-300 border border-cyan-400/10">
+                  {card.category}
+                </span>
+
+                <h3 className="text-lg font-bold text-white mt-4">
+                  {card.claim}
+                </h3>
+              </div>
+
+              <div className="p-6">
+                <div className="mb-4 p-4 rounded-xl bg-white/5 border border-white/10">
+                  <p className="text-lg font-semibold text-white">{card.check}</p>
+                </div>
+
+                <h4 className="text-sm font-semibold text-cyan-300 mb-2">Evidence</h4>
+                <p className="text-gray-400 text-sm leading-relaxed">{card.evidence}</p>
+
+                {activeCard === card.id && (
                   <motion.div
-                    className="flex items-center justify-between"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.2, duration: 0.4 }}
+                    className="mt-4 p-4 rounded-xl bg-gradient-to-r from-cyan-500/5 to-purple-500/5 border border-cyan-500/20"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
                   >
-                    <motion.span
-                      className="inline-block px-3 py-1 rounded-full text-xs font-medium"
-                      style={{
-                        background: `linear-gradient(135deg, ${card.color.replace('from-', '').replace(' to-', '').replace('-400', '')}/20)`,
-                        color: card.color.replace('from-', '').replace(' to-', '').replace('-400', '')
-                      }}
-                      whileHover={{ scale: 1.05 }}
-                    >
-                      {card.category}
-                    </motion.span>
-                    <motion.div
-                      className="w-8 h-8 rounded-full flex items-center justify-center"
-                      style={{
-                        background: `linear-gradient(135deg, ${card.color.replace('from-', '').replace(' to-', '').replace('-400', '')}/20)`
-                      }}
-                      animate={activeCard === card.id ? { rotate: 45 } : { rotate: 0 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <motion.span
-                        className="text-white"
-                        animate={{ scale: [1, 1.1, 1] }}
-                        transition={{ duration: 1, repeat: Infinity }}
-                      >
-                        {activeCard === card.id ? '−' : '+'}
-                      </motion.span>
-                    </motion.div>
+                    <h4 className="text-sm font-semibold text-purple-300 mb-2">
+                      Explanation
+                    </h4>
+                    <p className="text-gray-300 text-sm leading-relaxed">
+                      {card.explanation}
+                    </p>
                   </motion.div>
-
-                  <motion.h3
-                    className="text-lg font-bold text-white mt-4"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3, duration: 0.4 }}
-                  >
-                    {card.claim}
-                  </motion.h3>
-                </motion.div>
-
-                {/* Card Content */}
-                <motion.div
-                  className="p-6"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4, duration: 0.4 }}
-                >
-                  {/* Check Section */}
-                  <motion.div
-                    className="mb-4 p-4 rounded-xl bg-white/5 border border-white/10"
-                    whileHover={{ scale: 1.01, borderColor: 'rgba(6, 182, 212, 0.3)' }}
-                  >
-                    <motion.div
-                      className="flex items-center gap-3"
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.5, duration: 0.4 }}
-                    >
-                      <motion.span
-                        className="text-2xl"
-                        animate={{ rotate: card.check.includes('✓') ? [0, 10, -10, 0] : [0, 0, 0, 0] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                      >
-                        {card.check}
-                      </motion.span>
-                      <motion.span
-                        className="text-lg font-semibold text-white"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.6 }}
-                      >
-                        {card.check.replace('✓', '').replace('❌', '').replace('⚠️', '').trim()}
-                      </motion.span>
-                    </motion.div>
-                  </motion.div>
-
-                  {/* Evidence */}
-                  <motion.div
-                    className="mb-4"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.7, duration: 0.4 }}
-                  >
-                    <motion.h4
-                      className="text-sm font-semibold text-cyan-300 mb-2 flex items-center gap-2"
-                      whileHover={{ color: 'rgba(168, 85, 247, 1)' }}
-                    >
-                      <span className="w-2 h-2 rounded-full bg-cyan-400" />
-                      Evidence
-                    </motion.h4>
-                    <motion.p
-                      className="text-gray-400 text-sm"
-                      whileHover={{ color: 'rgba(255, 255, 255, 0.8)' }}
-                    >
-                      {card.evidence}
-                    </motion.p>
-                  </motion.div>
-
-                  {/* Explanation - Expanded */}
-                  {activeCard === card.id && (
-                    <motion.div
-                      className="mt-4 p-4 rounded-xl bg-gradient-to-r from-cyan-500/5 to-purple-500/5 border border-cyan-500/20"
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      transition={{ duration: 0.4, ease: 'easeInOut' }}
-                    >
-                      <motion.h4
-                        className="text-sm font-semibold text-purple-300 mb-2 flex items-center gap-2"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1, duration: 0.3 }}
-                      >
-                        <span className="w-2 h-2 rounded-full bg-purple-400" />
-                        Explanation
-                      </motion.h4>
-                      <motion.p
-                        className="text-gray-300 text-sm leading-relaxed"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2, duration: 0.3 }}
-                      >
-                        {card.explanation}
-                      </motion.p>
-
-                      {/* Visual Indicator */}
-                      <motion.div
-                        className="mt-4 h-2 rounded-full bg-gradient-to-r from-cyan-500/30 to-purple-500/30"
-                        initial={{ width: 0 }}
-                        animate={{ width: '100%' }}
-                        transition={{ delay: 0.3, duration: 0.5 }}
-                      />
-                    </motion.div>
-                  )}
-
-                  {/* Card ID Badge */}
-                  <motion.div
-                    className="absolute bottom-4 right-4 w-8 h-8 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20"
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.8, duration: 0.3 }}
-                  >
-                    <motion.span
-                      className="text-sm font-bold text-white"
-                      whileHover={{ scale: 1.1 }}
-                    >
-                      {card.id}
-                    </motion.span>
-                  </motion.div>
-                </motion.div>
-
-                {/* Corner Accents */}
-                <div className="absolute -top-1 -left-1 w-3 h-3 border-l-2 border-t-2 border-cyan-500/30 rounded-br" />
-                <div className="absolute -bottom-1 -left-1 w-3 h-3 border-l-2 border-b-2 border-cyan-500/30 rounded-tr" />
-                <div className="absolute -top-1 -right-1 w-3 h-3 border-r-2 border-t-2 border-purple-500/30 rounded-bl" />
-                <div className="absolute -bottom-1 -right-1 w-3 h-3 border-r-2 border-b-2 border-purple-500/30 rounded-tl" />
-              </motion.div>
+                )}
+              </div>
             </motion.div>
           ))}
-        </motion.div>
+        </div>
       </div>
     </motion.div>
   );
 };
 
-// ============================================
-// MAIN INSIDE THE MACHINE SECTION
-// ============================================
-
 const InsideTheMachine = () => {
   const [activeModule, setActiveModule] = useState(null);
 
   return (
-    <section className="relative w-full bg-gradient-to-br from-[#0a0a0f] via-[#0d0d15] to-[#11111a]">
-      {/* Background Elements */}
-      <div className="absolute inset-0 overflow-hidden -z-10">
+    <section className="relative w-full bg-gradient-to-br from-[#0a0a0f] via-[#0d0d15] to-[#11111a] overflow-hidden">
+      <div className="absolute inset-0 -z-10">
         <div className="absolute inset-0 cyber-grid opacity-20" />
         <motion.div
-          className="absolute top-1/4 left-10% w-72 h-72 bg-purple-600/10 rounded-full blur-3xl"
-          animate={{
-            x: [0, 50, 0],
-            y: [0, -30, 0],
-            opacity: [0.1, 0.2, 0.1]
-          }}
-          transition={{ duration: 8, ease: 'easeInOut', repeat: Infinity, repeatType: 'loop' }}
+          className="absolute top-1/4 left-10 w-72 h-72 bg-purple-600/10 rounded-full blur-3xl"
+          animate={{ x: [0, 50, 0], y: [0, -30, 0], opacity: [0.1, 0.2, 0.1] }}
+          transition={{ duration: 8, repeat: Infinity }}
         />
         <motion.div
-          className="absolute bottom-1/4 right-10% w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"
-          animate={{
-            x: [0, -40, 0],
-            y: [0, 40, 0],
-            opacity: [0.05, 0.15, 0.05]
-          }}
-          transition={{ duration: 10, ease: 'easeInOut', repeat: Infinity, repeatType: 'loop' }}
+          className="absolute bottom-1/4 right-10 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"
+          animate={{ x: [0, -40, 0], y: [0, 40, 0], opacity: [0.05, 0.15, 0.05] }}
+          transition={{ duration: 10, repeat: Infinity }}
         />
       </div>
 
-      {/* Main Content */}
       <div className="relative z-10">
-        {/* Section Header */}
         <motion.div
-          className="text-center py-16"
+          className="text-center py-16 px-4"
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
         >
-          <motion.span
-            className="inline-block px-4 py-1.5 bg-white/5 backdrop-blur-md rounded-full text-sm font-medium text-purple-300 border border-purple-500/20 mb-6"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2 }}
-          >
+          <span className="inline-block px-4 py-1.5 bg-white/5 backdrop-blur-md rounded-full text-sm font-medium text-purple-300 border border-purple-500/20 mb-6">
             Interactive Educational Visualization
-          </motion.span>
-          <motion.h2
-            className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
-          >
-            <motion.span
-              className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-white to-cyan-400"
-              style={{ backgroundSize: '200% auto' }}
-              animate={{ backgroundPosition: ['0% 0%', '100% 0%', '0% 0%'] }}
-              transition={{ duration: 5, ease: 'linear', repeat: Infinity }}
-            >
+          </span>
+
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-white to-cyan-400">
               Inside The Machine
-            </motion.span>
-          </motion.h2>
-          <motion.p
-            className="text-lg md:text-xl text-gray-300 max-w-4xl mx-auto"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.6 }}
-          >
-            <motion.span
-              className="text-transparent bg-clip-text bg-gradient-to-r from-gray-400 to-gray-500"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-            >
-              Educational concept visualization.
-            </motion.span>{' '}
-            This is an educational concept visualization. This is not an exact replica of any real election system.
+            </span>
+          </h2>
+
+          <p className="text-lg md:text-xl text-gray-300 max-w-4xl mx-auto leading-relaxed">
+            Educational concept visualization. This is not an exact replica of any real election system.
             All explanations are neutral and educational.
-          </motion.p>
+          </p>
         </motion.div>
 
-        {/* Module Info Panel - Shown when a module is clicked */}
         {activeModule && (
           <motion.div
-            className="fixed top-20 left-1/2 -translate-x-1/2 w-full max-w-2xl z-50"
-            initial={{ opacity: 0, y: -50 }}
+            className="fixed top-20 left-1/2 -translate-x-1/2 w-[92%] max-w-2xl z-50"
+            initial={{ opacity: 0, y: -40 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -50 }}
-            transition={{ duration: 0.4, ease: 'easeInOut' }}
           >
-            <motion.div
-              className="rounded-2xl glass-card border border-white/20 shadow-2xl overflow-hidden"
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              transition={{ duration: 0.4, ease: 'easeOut' }}
-            >
-              <motion.div
-                className="p-6 border-b border-white/10"
-                style={{
-                  background: `linear-gradient(135deg, ${activeModule === 'Ballot Unit' ? 'rgba(6, 182, 212, 0.1)' : activeModule === 'Control Unit' ? 'rgba(168, 85, 247, 0.1)' : 'rgba(16, 185, 129, 0.1)'})`
-                }}
-              >
-                <motion.div
-                  className="flex items-center justify-between"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.1, duration: 0.4 }}
+            <div className="rounded-2xl bg-[#101827]/95 backdrop-blur-xl border border-white/20 shadow-2xl overflow-hidden">
+              <div className="p-6 border-b border-white/10 flex items-center justify-between">
+                <h3 className="text-xl font-bold text-white">{activeModule}</h3>
+
+                <button
+                  onClick={() => setActiveModule(null)}
+                  className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center border border-white/20 hover:bg-white/20"
                 >
-                  <motion.h3
-                    className="text-xl font-bold text-white"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.2 }}
-                  >
-                    {activeModule}
-                  </motion.h3>
-                  <motion.button
-                    onClick={() => setActiveModule(null)}
-                    className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 hover:bg-white/20 transition-all duration-300"
-                    whileHover={{ scale: 1.05, rotate: 90 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <motion.span
-                      className="text-white"
-                      animate={{ rotate: [0, 90, 180, 270] }}
-                      transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-                    >
-                      ×
-                    </motion.span>
-                  </motion.button>
-                </motion.div>
-              </motion.div>
-              <motion.div
-                className="p-6"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3, duration: 0.4 }}
-              >
-                <motion.p
-                  className="text-gray-300 leading-relaxed"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.4 }}
-                >
-                  {activeModule === 'Ballot Unit' && (
-                    <span>
-                      The Ballot Unit is the voter-facing component where selections are made.
-                      In a simplified EVM-style system, this module displays candidate information,
-                      captures voter choices through touch or button input, and ensures the vote is
-                      recorded accurately before moving to verification.
-                    </span>
-                  )}
-                  {activeModule === 'Control Unit' && (
-                    <span>
-                      The Control Unit is the administrative heart of the system. It manages the
-                      entire voting process including ballot activation, session control, and
-                      polling officer authentication. This module ensures that only authorized
-                      personnel can start, pause, or end voting sessions.
-                    </span>
-                  )}
-                  {activeModule === 'Verification Window' && (
-                    <span>
-                      The Verification Window provides voters with confidence in their vote.
-                      Similar to VVPAT (Voter Verified Paper Audit Trail) systems, this component
-                      displays the voter's selections for final confirmation before the vote is
-                      permanently recorded. This creates an auditable trail for post-election verification.
-                    </span>
-                  )}
-                </motion.p>
-              </motion.div>
-            </motion.div>
+                  ×
+                </button>
+              </div>
+
+              <div className="p-6">
+                <p className="text-gray-300 leading-relaxed">
+                  {activeModule === 'Ballot Unit' &&
+                    'The Ballot Unit is the voter-facing component where selections are made in this simplified educational model.'}
+
+                  {activeModule === 'Control Unit' &&
+                    'The Control Unit manages ballot activation and controls one voting session in this simplified educational model.'}
+
+                  {activeModule === 'Verification Window' &&
+                    'The Verification Window shows a VVPAT-style confirmation concept for educational understanding.'}
+                </p>
+              </div>
+            </div>
           </motion.div>
         )}
 
-        {/* All Parts */}
         <div className="space-y-8">
-          <MachineAnatomy
-            activeModule={activeModule}
-            onModuleClick={setActiveModule}
-          />
+          <MachineAnatomy activeModule={activeModule} onModuleClick={setActiveModule} />
           <VoteJourneyVisualization />
           <SecurityLayersVisualization />
           <TechnologyVsAssumptions />
         </div>
       </div>
-
-      {/* Decorative Elements */}
-      <motion.div
-        className="absolute bottom-8 left-8 w-32 h-1 bg-gradient-to-r from-purple-500/0 via-purple-500/40 to-transparent"
-        animate={{ opacity: [0.3, 0.7, 0.3] }}
-        transition={{ duration: 3, repeat: Infinity }}
-      />
-      <motion.div
-        className="absolute bottom-8 right-8 w-32 h-1 bg-gradient-to-l from-cyan-500/0 via-cyan-500/40 to-transparent"
-        animate={{ opacity: [0.3, 0.7, 0.3] }}
-        transition={{ duration: 3, repeat: Infinity, delay: 1 }}
-      />
     </section>
   );
 };

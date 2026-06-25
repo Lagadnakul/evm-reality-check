@@ -707,7 +707,7 @@ const VotingDemoSection = () => {
   };
 
   return (
-    <section className="relative py-24 w-full bg-gradient-to-br from-[#0a0a0f] via-[#0d0d15] to-[#0a0a0f]">
+    <section id="voting-demo" className="relative py-24 w-full bg-gradient-to-br from-[#0a0a0f] via-[#0d0d15] to-[#0a0a0f]">
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden -z-10">
         {/* Cyber Grid */}

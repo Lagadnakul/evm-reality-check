@@ -219,7 +219,7 @@ if hack_mode == True:
   }, [stage]);
 
   return (
-    <section className="relative min-h-screen py-20 bg-gradient-to-br from-[#0a0a0f] via-[#0d0d15] to-[#11111a] overflow-hidden">
+    <section id="hacker-mode" className="relative min-h-screen py-20 bg-gradient-to-br from-[#0a0a0f] via-[#0d0d15] to-[#11111a] overflow-hidden">
       {/* Background */}
       <MatrixParticles />
       <div className="absolute inset-0 cyber-grid opacity-20" />

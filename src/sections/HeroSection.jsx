@@ -2,7 +2,6 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 const HeroSection = () => {
-  // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -47,71 +46,34 @@ const HeroSection = () => {
     },
   };
 
-  const glowVariants = {
-    initial: { opacity: 0.3 },
-    animate: {
-      opacity: [0.3, 0.6, 0.3],
-      transition: { duration: 3, ease: "easeInOut", repeat: Infinity, repeatType: "loop" },
-    },
-  };
-
-  const pulseVariants = {
-    animate: {
-      scale: [1, 1.05, 1],
-      opacity: [0.8, 1, 0.8],
-      transition: { duration: 2, ease: "easeInOut", repeat: Infinity, repeatType: "loop" },
-    },
-  };
-
   return (
     <section className="relative min-h-screen w-full overflow-hidden bg-gradient-to-br from-[#0a0a0f] via-[#0d0d15] to-[#0a0a0f]">
-      {/* Animated Background */}
       <div className="absolute inset-0 z-0">
-        {/* Cyber Grid */}
         <div className="absolute inset-0 cyber-grid opacity-20" />
 
-        {/* Animated gradient blobs - Enhanced */}
         <motion.div
           className="absolute top-1/4 left-1/4 w-72 h-72 bg-purple-600/15 rounded-full blur-3xl"
-          animate={{
-            x: [0, 50, 0],
-            y: [0, -30, 0],
-            opacity: [0.15, 0.25, 0.15],
-            scale: [1, 1.05, 1],
-          }}
+          animate={{ x: [0, 50, 0], y: [0, -30, 0], opacity: [0.15, 0.25, 0.15], scale: [1, 1.05, 1] }}
           transition={{ duration: 8, ease: "easeInOut", repeat: Infinity, repeatType: "loop" }}
         />
 
         <motion.div
           className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"
-          animate={{
-            x: [0, -40, 0],
-            y: [0, 40, 0],
-            opacity: [0.1, 0.2, 0.1],
-            scale: [1, 1.03, 1],
-          }}
+          animate={{ x: [0, -40, 0], y: [0, 40, 0], opacity: [0.1, 0.2, 0.1], scale: [1, 1.03, 1] }}
           transition={{ duration: 10, ease: "easeInOut", repeat: Infinity, repeatType: "loop" }}
         />
 
         <motion.div
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-gradient-to-br from-purple-500/5 to-cyan-500/5 rounded-full blur-3xl"
-          animate={{
-            scale: [1, 1.1, 1],
-            opacity: [0.05, 0.1, 0.05],
-            rotate: [0, 5, -5, 0],
-          }}
+          animate={{ scale: [1, 1.1, 1], opacity: [0.05, 0.1, 0.05], rotate: [0, 5, -5, 0] }}
           transition={{ duration: 6, ease: "easeInOut", repeat: Infinity, repeatType: "loop" }}
         />
 
-        {/* Subtle particles - Enhanced */}
         {[...Array(30)].map((_, i) => (
           <motion.div
             key={i}
             className="absolute w-1 h-1 bg-white/30 rounded-full"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
+            style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%` }}
             animate={{
               y: [0, -100 - Math.random() * 200],
               opacity: [0.3, 0, 0.3],
@@ -129,7 +91,6 @@ const HeroSection = () => {
         ))}
       </div>
 
-      {/* Content Container */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         <motion.div
           className="grid lg:grid-cols-2 gap-12 items-center"
@@ -137,21 +98,7 @@ const HeroSection = () => {
           initial="hidden"
           animate="visible"
         >
-          {/* LEFT SIDE - Content */}
           <div className="space-y-8">
-            {/* Badge */}
-n{/* Research Build Badge - NEW */}
-<motion.div variants={badgeVariants} className="inline-block mb-4">
-<span className="inline-flex items-center px-4 py-2 bg-purple-500/10 backdrop-blur-md rounded-full text-sm font-medium text-purple-300 border border-purple-500/20 shadow-lg">
-<motion.span
-className="w-2 h-2 bg-purple-400 rounded-full mr-2"
-animate={{ opacity: [1, 0.5, 1] }}
-transition={{ duration: 2, repeat: Infinity }}
-/>&nbsp;
-Research Build #001 — Nakul Lagad
-</span>
-</motion.div>
-
             <motion.div variants={badgeVariants} className="inline-block">
               <span className="inline-flex items-center px-4 py-2 bg-white/5 backdrop-blur-md rounded-full text-sm font-medium text-cyan-300 border border-cyan-500/20 shadow-lg">
                 <motion.span
@@ -163,7 +110,6 @@ Research Build #001 — Nakul Lagad
               </span>
             </motion.div>
 
-            {/* Main Heading */}
             <motion.h1 variants={itemVariants} className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
               <motion.span
                 className="block text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-200 to-white"
@@ -181,21 +127,19 @@ Research Build #001 — Nakul Lagad
               </motion.span>
             </motion.h1>
 
-            {/* Subheading */}
-            <motion.p
-              variants={itemVariants}
-              className="text-lg md:text-xl text-gray-300 max-w-lg leading-relaxed"
-            >
+            <motion.p variants={itemVariants} className="text-lg md:text-xl text-gray-300 max-w-lg leading-relaxed">
               Explore how electronic voting works, understand common myths, and test
               the famous 3-syntax-error hacking theory.
             </motion.p>
 
-            {/* Buttons */}
-            <motion.div
-              variants={itemVariants}
-              className="flex flex-col sm:flex-row gap-4"
-            >
+            <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4">
               <motion.button
+                onClick={() => {
+                  document.getElementById('voting-demo')?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start',
+                  });
+                }}
                 variants={buttonVariants}
                 initial="initial"
                 whileHover="hover"
@@ -209,6 +153,12 @@ Research Build #001 — Nakul Lagad
               </motion.button>
 
               <motion.button
+                onClick={() => {
+                  document.getElementById('hacker-mode')?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start',
+                  });
+                }}
                 variants={buttonVariants}
                 initial="initial"
                 whileHover="hover"
@@ -223,48 +173,29 @@ Research Build #001 — Nakul Lagad
             </motion.div>
           </div>
 
-          {/* RIGHT SIDE - Enhanced EVM Machine Concept */}
-          <motion.div
-            variants={itemVariants}
-            className="relative flex justify-center items-center lg:justify-end"
-          >
+          <motion.div variants={itemVariants} className="relative flex justify-center items-center lg:justify-end">
             <div className="relative w-full max-w-md">
-              {/* EVM Base - Enhanced */}
-              <motion.div
-                variants={floatingVariants}
-                className="relative w-80 h-[500px] evm-machine rounded-3xl overflow-hidden p-1"
-              >
-                {/* Outer Frame */}
+              <motion.div variants={floatingVariants} className="relative w-80 h-[500px] evm-machine rounded-3xl overflow-hidden p-1">
                 <motion.div
                   className="absolute inset-0 rounded-3xl border border-white/10"
                   animate={{ borderColor: ['rgba(255, 255, 255, 0.1)', 'rgba(6, 182, 212, 0.2)'] }}
                   transition={{ duration: 4, repeat: Infinity }}
                 />
 
-                {/* Machine Bezel */}
                 <div className="absolute inset-1 rounded-3xl bg-gradient-to-b from-[#1a1a24] to-[#0d0d15] border border-white/5" />
 
-                {/* ===== TOP SECTION - Machine Title ===== */}
-                <motion.div
-                  className="absolute top-4 left-0 right-0 text-center"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.3 }}
-                >
+                <motion.div className="absolute top-4 left-0 right-0 text-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
                   <span className="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 tracking-wider">
                     EVM-CONCEPT
                   </span>
                 </motion.div>
 
-                {/* ===== SCREEN SECTION - Larger and Centered ===== */}
                 <div className="absolute top-12 left-4 right-4 h-48">
-                  {/* Screen Frame */}
                   <motion.div
                     className="absolute inset-0 rounded-2xl evm-screen overflow-hidden"
                     animate={{ borderColor: ['rgba(6, 182, 212, 0.3)', 'rgba(168, 85, 247, 0.3)'] }}
                     transition={{ duration: 3, repeat: Infinity }}
                   >
-                    {/* Screen Background */}
                     <motion.div
                       className="absolute inset-0 bg-gradient-to-br from-[#0a0a0f] to-[#11111a]"
                       animate={{
@@ -276,28 +207,29 @@ Research Build #001 — Nakul Lagad
                       transition={{ duration: 4, repeat: Infinity }}
                     />
 
-                    {/* Scan Line Effect */}
                     <motion.div
                       className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent"
                       animate={{ y: [0, 192, 0], opacity: [0.8, 0.4, 0.8] }}
                       transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
                     />
 
-                    {/* Display Content */}
                     <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
-                      <motion.div
-                        className="text-center"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.5, duration: 0.6 }}
-                      >
+                      <motion.div className="text-center" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.6 }}>
                         <motion.div
                           className="text-4xl font-mono text-white/80 tracking-widest mb-1"
-                          animate={{ opacity: [0.5, 1, 0.5], textShadow: ['0 0 5px rgba(6, 182, 212, 0.5)', '0 0 20px rgba(6, 182, 212, 0.8)', '0 0 5px rgba(6, 182, 212, 0.5)'] }}
+                          animate={{
+                            opacity: [0.5, 1, 0.5],
+                            textShadow: [
+                              '0 0 5px rgba(6, 182, 212, 0.5)',
+                              '0 0 20px rgba(6, 182, 212, 0.8)',
+                              '0 0 5px rgba(6, 182, 212, 0.5)',
+                            ],
+                          }}
                           transition={{ duration: 2, repeat: Infinity }}
                         >
                           VOTING
                         </motion.div>
+
                         <motion.div
                           className="text-2xl font-mono text-cyan-300/80 tracking-widest"
                           animate={{ opacity: [0.5, 1, 0.5] }}
@@ -307,29 +239,17 @@ Research Build #001 — Nakul Lagad
                         </motion.div>
                       </motion.div>
 
-                      {/* Time Display */}
-                      <motion.div
-                        className="absolute bottom-2 right-2 text-xs font-mono text-white/60"
-                        animate={{ opacity: [0.5, 1, 0.5] }}
-                        transition={{ duration: 1.5, repeat: Infinity }}
-                      >
+                      <motion.div className="absolute bottom-2 right-2 text-xs font-mono text-white/60" animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 1.5, repeat: Infinity }}>
                         09:41:23
                       </motion.div>
                     </div>
                   </motion.div>
 
-                  {/* Screen Glass Effect */}
                   <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-transparent via-white/5 to-transparent pointer-events-none" />
                 </div>
 
-                {/* ===== MIDDLE SECTION - Status Indicators ===== */}
                 <div className="absolute top-64 left-4 right-4 h-12">
-                  <motion.div
-                    className="absolute inset-0 flex items-center justify-between px-2"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.4 }}
-                  >
+                  <motion.div className="absolute inset-0 flex items-center justify-between px-2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
                     {[
                       { color: '#10b981', label: 'Power' },
                       { color: '#06b6d4', label: 'Ready' },
@@ -347,12 +267,7 @@ Research Build #001 — Nakul Lagad
                           }}
                           transition={{ duration: 1.5 + i * 0.2, repeat: Infinity, delay: i * 0.2 }}
                         />
-                        <motion.span
-                          className="text-xs text-white/60 mt-1 font-mono"
-                          initial={{ opacity: 0, y: 5 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.6 + i * 0.1 }}
-                        >
+                        <motion.span className="text-xs text-white/60 mt-1 font-mono" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 + i * 0.1 }}>
                           {light.label}
                         </motion.span>
                       </motion.div>
@@ -360,15 +275,8 @@ Research Build #001 — Nakul Lagad
                   </motion.div>
                 </div>
 
-                {/* ===== BUTTON PANEL SECTION ===== */}
                 <div className="absolute top-80 left-4 right-4 h-16">
-                  <motion.div
-                    className="absolute inset-0 rounded-xl machine-panel-glow flex items-center justify-center gap-2 px-4"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5, duration: 0.5 }}
-                  >
-                    {/* Ballot Buttons */}
+                  <motion.div className="absolute inset-0 rounded-xl machine-panel-glow flex items-center justify-center gap-2 px-4" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.5 }}>
                     {['SELECT', 'CONFIRM', 'CAST', 'CANCEL'].map((btn, i) => (
                       <motion.button
                         key={i}
@@ -383,96 +291,40 @@ Research Build #001 — Nakul Lagad
                   </motion.div>
                 </div>
 
-                {/* ===== BOTTOM SECTION - VVPAT Window ===== */}
                 <div className="absolute bottom-16 left-4 right-4 h-14">
-                  <motion.div
-                    className="absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-500/5 to-purple-500/5 border border-cyan-500/20 flex items-center px-4"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.6, duration: 0.5 }}
-                  >
-                    {/* VVPAT Content Area */}
+                  <motion.div className="absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-500/5 to-purple-500/5 border border-cyan-500/20 flex items-center px-4" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6, duration: 0.5 }}>
                     <div className="flex-1 h-6 bg-white/5 rounded mx-4 relative overflow-hidden">
-                      <motion.div
-                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
-                        animate={{ x: ['-100%', '100%'] }}
-                        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                      />
-                      <motion.span
-                        className="absolute inset-0 flex items-center justify-center text-xs font-mono text-white/80"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: [0.3, 0.8, 0.3] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                      >
+                      <motion.div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent" animate={{ x: ['-100%', '100%'] }} transition={{ duration: 2, repeat: Infinity, ease: "linear" }} />
+                      <motion.span className="absolute inset-0 flex items-center justify-center text-xs font-mono text-white/80" initial={{ opacity: 0 }} animate={{ opacity: [0.3, 0.8, 0.3] }} transition={{ duration: 2, repeat: Infinity }}>
                         VERIFY YOUR VOTE
                       </motion.span>
                     </div>
                   </motion.div>
                 </div>
 
-                {/* ===== SIDE ACCENTS ===== */}
-                {/* Left Side Panel */}
                 <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-32 bg-gradient-to-b from-cyan-500/20 to-transparent rounded-r-full" />
                 <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-32 bg-gradient-to-b from-purple-500/20 to-transparent rounded-l-full" />
 
-                {/* Bottom Vent */}
                 <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-24 h-2">
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-cyan-500/30 via-purple-500/30 to-cyan-500/30 rounded"
-                    animate={{ opacity: [0.3, 0.6, 0.3] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  />
+                  <motion.div className="absolute inset-0 bg-gradient-to-r from-cyan-500/30 via-purple-500/30 to-cyan-500/30 rounded" animate={{ opacity: [0.3, 0.6, 0.3] }} transition={{ duration: 2, repeat: Infinity }} />
                   {[...Array(5)].map((_, i) => (
-                    <div key={i} className={`absolute top-0 w-1 h-2 bg-cyan-500/40 rounded-t-full ${i * 6}px`} />
+                    <div key={i} className="absolute top-0 w-1 h-2 bg-cyan-500/40 rounded-t-full" style={{ left: `${i * 20}%` }} />
                   ))}
                 </div>
-
-                {/* Corner Accents */}
-                <motion.div
-                  className="absolute -top-1 -left-1 w-4 h-4 border-l-2 border-t-2 border-cyan-500/30 rounded-bl"
-                  animate={{ borderColor: ['rgba(6, 182, 212, 0.2)', 'rgba(168, 85, 247, 0.3)'] }}
-                  transition={{ duration: 3, repeat: Infinity }}
-                />
-                <motion.div
-                  className="absolute -top-1 -right-1 w-4 h-4 border-r-2 border-t-2 border-purple-500/30 rounded-bl"
-                  animate={{ borderColor: ['rgba(168, 85, 247, 0.2)', 'rgba(6, 182, 212, 0.3)'] }}
-                  transition={{ duration: 3, repeat: Infinity, delay: 1 }}
-                />
-                <motion.div
-                  className="absolute -bottom-1 -left-1 w-4 h-4 border-l-2 border-b-2 border-cyan-500/30 rounded-tr"
-                  animate={{ borderColor: ['rgba(6, 182, 212, 0.2)', 'rgba(168, 85, 247, 0.3)'] }}
-                  transition={{ duration: 3, repeat: Infinity, delay: 0.5 }}
-                />
-                <motion.div
-                  className="absolute -bottom-1 -right-1 w-4 h-4 border-r-2 border-b-2 border-purple-500/30 rounded-tl"
-                  animate={{ borderColor: ['rgba(168, 85, 247, 0.2)', 'rgba(6, 182, 212, 0.3)'] }}
-                  transition={{ duration: 3, repeat: Infinity, delay: 1.5 }}
-                />
               </motion.div>
 
-              {/* Outer Glow Ring */}
               <motion.div
                 className="absolute inset-0 rounded-3xl ring-2 ring-offset-2"
                 style={{ ringOffsetColor: '#0a0a0f' }}
-                animate={{
-                  ringColor: [
-                    'rgba(168, 85, 247, 0.2)',
-                    'rgba(6, 182, 212, 0.2)',
-                    'rgba(168, 85, 247, 0.2)',
-                  ],
-                }}
+                animate={{ ringColor: ['rgba(168, 85, 247, 0.2)', 'rgba(6, 182, 212, 0.2)', 'rgba(168, 85, 247, 0.2)'] }}
                 transition={{ duration: 4, repeat: Infinity }}
               />
 
-              {/* Floating particles around EVM */}
               {[...Array(12)].map((_, i) => (
                 <motion.div
                   key={i}
                   className="absolute w-1.5 h-1.5 bg-white/40 rounded-full"
-                  style={{
-                    left: `${10 + Math.random() * 80}%`,
-                    top: `${10 + Math.random() * 80}%`,
-                  }}
+                  style={{ left: `${10 + Math.random() * 80}%`, top: `${10 + Math.random() * 80}%` }}
                   animate={{
                     y: [0, -20 - Math.random() * 40],
                     opacity: [0.4, 0, 0.4],
@@ -493,17 +345,8 @@ Research Build #001 — Nakul Lagad
         </motion.div>
       </div>
 
-      {/* Decorative corner elements */}
-      <motion.div
-        className="absolute top-8 left-8 w-32 h-1 bg-gradient-to-r from-purple-500/0 via-purple-500/40 to-transparent"
-        animate={{ opacity: [0.3, 0.7, 0.3] }}
-        transition={{ duration: 3, repeat: Infinity }}
-      />
-      <motion.div
-        className="absolute top-8 right-8 w-32 h-1 bg-gradient-to-l from-cyan-500/0 via-cyan-500/40 to-transparent"
-        animate={{ opacity: [0.3, 0.7, 0.3] }}
-        transition={{ duration: 3, repeat: Infinity, delay: 1 }}
-      />
+      <motion.div className="absolute top-8 left-8 w-32 h-1 bg-gradient-to-r from-purple-500/0 via-purple-500/40 to-transparent" animate={{ opacity: [0.3, 0.7, 0.3] }} transition={{ duration: 3, repeat: Infinity }} />
+      <motion.div className="absolute top-8 right-8 w-32 h-1 bg-gradient-to-l from-cyan-500/0 via-cyan-500/40 to-transparent" animate={{ opacity: [0.3, 0.7, 0.3] }} transition={{ duration: 3, repeat: Infinity, delay: 1 }} />
     </section>
   );
 };
