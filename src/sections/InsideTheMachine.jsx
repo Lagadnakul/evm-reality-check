@@ -499,7 +499,10 @@ const InsideTheMachine = () => {
   const [activeModule, setActiveModule] = useState(null);
 
   return (
-    <section className="relative w-full bg-gradient-to-br from-[#0a0a0f] via-[#0d0d15] to-[#11111a] overflow-hidden">
+   <section
+  id="inside-machine"
+  className="relative w-full bg-gradient-to-br from-[#0a0a0f] via-[#0d0d15] to-[#11111a] overflow-hidden"
+>
       <div className="absolute inset-0 -z-10">
         <div className="absolute inset-0 cyber-grid opacity-20" />
         <motion.div

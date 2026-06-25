@@ -384,49 +384,36 @@ if hack_mode == True:
               </TerminalWindow>
             </motion.div>
           )}
+{stage === 'complete' && (
+  <motion.div
+    key="complete"
+    className="flex flex-col items-center gap-6"
+    initial={{ opacity: 0, y: 40 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -40 }}
+    transition={{ duration: 0.5 }}
+  >
+    <RealityCheckCard
+      stats={stats}
+      onRestart={handleRestart}
+      onBack={handleBack}
+    />
 
-          {stage === 'executing' && (
-            <motion.div
-              key="executing"
-              className="flex flex-col items-center gap-6"
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -40 }}
-              transition={{ duration: 0.5 }}
-            >
-              <TerminalWindow title="EVM HACKER SIMULATOR">
-                <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {logs.map((log, index) => (
-                    <TerminalLog
-                      key={index}
-                      text={log.text}
-                      type={log.type}
-                      delay={log.delay}
-                    />
-                  ))}
-                </div>
-              </TerminalWindow>
-            </motion.div>
-          )}
-
-          {stage === 'complete' && (
-            <motion.div
-              key="complete"
-              className="flex flex-col items-center gap-6"
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -40 }}
-              transition={{ duration: 0.5 }}
-            >
-              <RealityCheckCard
-                title="Reality Check Complete"
-                stats={stats}
-                achievement="Certified Keyboard Warrior"
-                onRestart={handleRestart}
-                onBack={handleBack}
-              />
-            </motion.div>
-          )}
+    <motion.button
+      onClick={() => {
+        document.getElementById("inside-machine")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }}
+      className="mt-2 inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-purple-600 to-cyan-500 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+      whileHover={{ scale: 1.03, y: -2 }}
+      whileTap={{ scale: 0.98 }}
+    >
+      Explore How It Actually Works →
+    </motion.button>
+  </motion.div>
+)}
         </AnimatePresence>
 
         {/* Educational Message */}
