@@ -211,7 +211,7 @@ GitHub:
 https://github.com/Lagadnakul
 
 LinkedIn:
-(Add your LinkedIn URL)
+www.linkedin.com/in/nakul-lagad
 
 ---
 
