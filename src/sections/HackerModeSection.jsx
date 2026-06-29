@@ -39,31 +39,47 @@ const MatrixParticles = () => {
 };
 
 // Typing animation for terminal text
-const TypingText = ({ text, className = '', delay = 0 }) => {
+const TypingText = ({ text, className = '', delay = 0, speed = 24 }) => {
   const [displayedText, setDisplayedText] = useState('');
   const [index, setIndex] = useState(0);
+  const [started, setStarted] = useState(false);
 
   useEffect(() => {
+    setDisplayedText('');
+    setIndex(0);
+    setStarted(false);
+
+    const startTimer = setTimeout(() => {
+      setStarted(true);
+    }, delay * 1000);
+
+    return () => clearTimeout(startTimer);
+  }, [text, delay]);
+
+  useEffect(() => {
+    if (!started) return;
+
     if (index < text.length) {
       const timer = setTimeout(() => {
         setDisplayedText(prev => prev + text[index]);
         setIndex(prev => prev + 1);
-      }, 40);
+      }, speed);
+
       return () => clearTimeout(timer);
     }
-  }, [index, text]);
+  }, [started, index, text, speed]);
 
   return (
     <motion.span
       className={`font-mono text-cyan-400 ${className}`}
       initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ delay, duration: 0.3 }}
+      animate={{ opacity: started ? 1 : 0 }}
+      transition={{ duration: 0.25 }}
     >
       {displayedText}
-      {index < text.length && (
+      {started && index < text.length && (
         <motion.span
-          className="inline-block w-2 h-4 bg-cyan-400"
+          className="inline-block w-2 h-4 bg-cyan-400 ml-1"
           animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{ duration: 0.5, repeat: Infinity }}
         />
@@ -175,20 +191,21 @@ if hack_mode == True:
   const handleFixErrors = () => {
     setStage('fixing');
     setProgress(30);
+
     setTimeout(() => {
       setStage('show_fixed_code');
-      setProgress(50);
-    }, 3000);
+      setProgress(55);
+    }, 3600);
 
     setTimeout(() => {
       setStage('executing');
-      setProgress(70);
-    }, 6000);
+      setProgress(75);
+    }, 7600);
 
     setTimeout(() => {
       setStage('complete');
       setProgress(100);
-    }, 13000);
+    }, 16000);
   };
 
   const handleRestart = () => {

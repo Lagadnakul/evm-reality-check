@@ -123,7 +123,7 @@ const AuthorCard = () => {
   const [showCertificate, setShowCertificate] = useState(false);
 
   return (
-    <section className="relative w-full py-24 bg-gradient-to-br from-[#0a0a0f] via-[#0d0d15] to-[#11111a]">
+    <section id="author-section" className="relative w-full py-24 bg-gradient-to-br from-[#0a0a0f] via-[#0d0d15] to-[#11111a]">
       <div className="absolute inset-0 overflow-hidden -z-10">
         <div className="absolute inset-0 cyber-grid opacity-20" />
       </div>

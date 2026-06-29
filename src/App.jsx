@@ -20,6 +20,7 @@ const navLinks = [
   { name: 'Voting Demo', href: '#voting-demo' },
   { name: 'Myths', href: '#myth-reality' },
   { name: 'Hacker Mode', href: '#hacker-mode' },
+  { name: 'Author', href: '#author-section' }
 ];
 
 const SectionDivider = () => (
