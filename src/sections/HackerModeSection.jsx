@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import TerminalWindow from '../components/hacker/TerminalWindow';
-import CodeBlock from '../components/hacker/CodeBlock';
 import RealityCheckCard from '../components/hacker/RealityCheckCard';
+
+const EASE_OUT = [0.23, 1, 0.32, 1];
 
 // Matrix rain particles
 const MatrixParticles = () => {
@@ -11,9 +12,9 @@ const MatrixParticles = () => {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
       {particles.map((_, i) => {
-        const left = Math.random() * 100;
-        const delay = Math.random() * 5;
-        const duration = 5 + Math.random() * 10;
+        const left = (i * 13.37) % 100;
+        const delay = (i * 0.17) % 5;
+        const duration = 5 + ((i * 0.41) % 10);
 
         return (
           <motion.div
@@ -38,8 +39,8 @@ const MatrixParticles = () => {
   );
 };
 
-// Typing animation for terminal text
-const TypingText = ({ text, className = '', delay = 0, speed = 24 }) => {
+// Typing animation without blinking cursor
+const TypingText = ({ text, className = '', delay = 0, speed = 18 }) => {
   const [displayedText, setDisplayedText] = useState('');
   const [index, setIndex] = useState(0);
   const [started, setStarted] = useState(false);
@@ -74,16 +75,9 @@ const TypingText = ({ text, className = '', delay = 0, speed = 24 }) => {
       className={`font-mono text-cyan-400 ${className}`}
       initial={{ opacity: 0 }}
       animate={{ opacity: started ? 1 : 0 }}
-      transition={{ duration: 0.25 }}
+      transition={{ duration: 0.2 }}
     >
       {displayedText}
-      {started && index < text.length && (
-        <motion.span
-          className="inline-block w-2 h-4 bg-cyan-400 ml-1"
-          animate={{ opacity: [0.5, 1, 0.5] }}
-          transition={{ duration: 0.5, repeat: Infinity }}
-        />
-      )}
     </motion.span>
   );
 };
@@ -101,14 +95,57 @@ const ProgressBar = ({ progress }) => {
         className="bg-gradient-to-r from-cyan-400 to-purple-400 h-full"
         initial={{ width: 0 }}
         animate={{ width: `${progress}%` }}
-        transition={{ duration: 0.8, delay: 0.3, ease: 'easeInOut' }}
+        transition={{ duration: 0.7, delay: 0.1, ease: 'easeInOut' }}
       />
     </motion.div>
   );
 };
 
-// Terminal log entry
-const TerminalLog = ({ text, type = 'info', delay = 0 }) => {
+const CodeLineBlock = ({ code, hasErrors = false, lineDelay = 520 }) => {
+  const [visibleLines, setVisibleLines] = useState(0);
+  const lines = code.split('\n');
+
+  useEffect(() => {
+    setVisibleLines(0);
+    const timers = lines.map((_, index) =>
+      setTimeout(() => setVisibleLines(index + 1), 250 + index * lineDelay)
+    );
+    return () => timers.forEach(clearTimeout);
+  }, [code, lineDelay, lines.length]);
+
+  return (
+    <div className="relative overflow-hidden rounded-xl border border-white/10 bg-black/40 font-mono text-sm shadow-inner">
+      <div className="flex items-center justify-between border-b border-white/10 px-4 py-2">
+        <span className="text-xs text-gray-500">election_hack.py</span>
+        <span className={`text-xs ${hasErrors ? 'text-red-400' : 'text-green-400'}`}>
+          {hasErrors ? '3 syntax errors' : 'syntax fixed'}
+        </span>
+      </div>
+
+      <div className="p-4 space-y-2">
+        {lines.map((line, index) => (
+          <motion.div
+            key={`${line}-${index}`}
+            className="flex gap-3 min-h-[22px]"
+            initial={{ opacity: 0, x: -10 }}
+            animate={{
+              opacity: visibleLines > index ? 1 : 0,
+              x: visibleLines > index ? 0 : -10
+            }}
+            transition={{ duration: 0.22, ease: EASE_OUT }}
+          >
+            <span className="w-6 shrink-0 select-none text-right text-gray-600">{index + 1}</span>
+            <span className={hasErrors && index === 0 ? 'text-red-300' : 'text-cyan-200'}>
+              {line}
+            </span>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const TerminalLog = ({ text, type = 'info' }) => {
   const colors = {
     info: 'text-cyan-400',
     error: 'text-red-400',
@@ -121,7 +158,7 @@ const TerminalLog = ({ text, type = 'info', delay = 0 }) => {
       className={`flex gap-2 font-mono text-sm ${colors[type]}`}
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ delay, duration: 0.3 }}
+      transition={{ duration: 0.22, ease: EASE_OUT }}
     >
       <span>{type === 'error' ? '❌' : type === 'success' ? '✓' : '>'}</span>
       <span>{text}</span>
@@ -129,7 +166,26 @@ const TerminalLog = ({ text, type = 'info', delay = 0 }) => {
   );
 };
 
-// Glitch text effect
+const AnimatedLogs = ({ logs, interval = 430 }) => {
+  const [visibleCount, setVisibleCount] = useState(0);
+
+  useEffect(() => {
+    setVisibleCount(0);
+    const timers = logs.map((_, index) =>
+      setTimeout(() => setVisibleCount(index + 1), 250 + index * interval)
+    );
+    return () => timers.forEach(clearTimeout);
+  }, [logs, interval]);
+
+  return (
+    <div className="space-y-3">
+      {logs.slice(0, visibleCount).map((log, index) => (
+        <TerminalLog key={index} text={log.text} type={log.type} />
+      ))}
+    </div>
+  );
+};
+
 const GlitchText = ({ text, className = '' }) => {
   return (
     <motion.span
@@ -148,32 +204,28 @@ const HackerModeSection = () => {
   const [stage, setStage] = useState('start');
   const [progress, setProgress] = useState(0);
 
-  // Broken code with 3 syntax errors
   const brokenCode = `print("Connecting to EVM" if hack_mode == True
 print("Access granted")
 print("System compromised")`;
 
-  // Fixed code
   const fixedCode = `print("Connecting to EVM")
 if hack_mode == True:
     print("Access granted")
     print("System compromised")`;
 
-  // Terminal logs
   const logs = [
-    { text: 'Loading Python election_hack.py...', type: 'info', delay: 1 },
-    { text: 'Syntax errors fixed successfully.', type: 'success', delay: 3 },
-    { text: 'Searching for WiFi module...', type: 'info', delay: 5 },
-    { text: 'ERROR: No WiFi interface found.', type: 'error', delay: 7 },
-    { text: 'Searching for Bluetooth...', type: 'info', delay: 9 },
-    { text: 'ERROR: No Bluetooth interface found.', type: 'error', delay: 11 },
-    { text: 'Trying internet connection...', type: 'info', delay: 13 },
-    { text: 'ERROR: No internet connection available.', type: 'error', delay: 15 },
-    { text: 'Launching AI super hacker agent...', type: 'info', delay: 17 },
-    { text: 'ERROR: Watching 4 YouTube tutorials is not a security certification.', type: 'error', delay: 19 },
+    { text: 'Loading Python election_hack.py...', type: 'info' },
+    { text: 'Syntax errors fixed successfully.', type: 'success' },
+    { text: 'Searching for WiFi module...', type: 'info' },
+    { text: 'ERROR: No WiFi interface found.', type: 'error' },
+    { text: 'Searching for Bluetooth...', type: 'info' },
+    { text: 'ERROR: No Bluetooth interface found.', type: 'error' },
+    { text: 'Trying internet connection...', type: 'info' },
+    { text: 'ERROR: No internet connection available.', type: 'error' },
+    { text: 'Launching AI super hacker agent...', type: 'info' },
+    { text: 'ERROR: Watching 4 YouTube tutorials is not a security certification.', type: 'error' },
   ];
 
-  // Stats for reality check
   const stats = {
     errorsFixed: 3,
     systemsHacked: 0,
@@ -181,11 +233,10 @@ if hack_mode == True:
     technicalDepth: 'WhatsApp University Certified'
   };
 
-  // Handle stage transitions
   const handleStart = () => {
     setStage('loading');
     setProgress(10);
-    setTimeout(() => setStage('show_code'), 2000);
+    setTimeout(() => setStage('show_code'), 1300);
   };
 
   const handleFixErrors = () => {
@@ -195,17 +246,19 @@ if hack_mode == True:
     setTimeout(() => {
       setStage('show_fixed_code');
       setProgress(55);
-    }, 3600);
+    }, 2800);
 
+    // Fixed code gets enough time to reveal all four lines clearly.
     setTimeout(() => {
       setStage('executing');
-      setProgress(75);
-    }, 7600);
+      setProgress(78);
+    }, 8000);
 
+    // Logs are faster than before, but still readable.
     setTimeout(() => {
       setStage('complete');
       setProgress(100);
-    }, 16000);
+    }, 13800);
   };
 
   const handleRestart = () => {
@@ -218,33 +271,12 @@ if hack_mode == True:
     setProgress(0);
   };
 
-  // Auto-advance through logs when in executing stage
-  useEffect(() => {
-    if (stage === 'executing') {
-      const totalLogs = logs.length;
-      let currentLogIndex = 0;
-
-      const interval = setInterval(() => {
-        currentLogIndex++;
-        if (currentLogIndex >= totalLogs) {
-          clearInterval(interval);
-        }
-      }, 2000);
-
-      return () => clearInterval(interval);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stage]);
-
   return (
     <section id="hacker-mode" className="relative py-20 sm:py-24 bg-gradient-to-br from-[#0a0a0f] via-[#0d0d15] to-[#11111a] overflow-hidden">
-      {/* Background */}
       <MatrixParticles />
       <div className="absolute inset-0 cyber-grid opacity-20" />
 
-      {/* Content Container */}
       <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
         <motion.div
           className="text-center mb-12"
           initial={{ opacity: 0, y: -20 }}
@@ -273,7 +305,6 @@ if hack_mode == True:
           <ProgressBar progress={progress} />
         </motion.div>
 
-        {/* Main Content - AnimatePresence for smooth transitions */}
         <AnimatePresence mode="wait">
           {stage === 'start' && (
             <motion.div
@@ -282,7 +313,7 @@ if hack_mode == True:
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -40 }}
-              transition={{ duration: 0.5 }}
+              transition={{ duration: 0.45 }}
             >
               <TerminalWindow title="EVM HACKER SIMULATOR">
                 <div className="flex flex-col items-center justify-center h-full text-center">
@@ -306,8 +337,8 @@ if hack_mode == True:
                     className="btn-cyber bg-gradient-to-r from-cyan-600 to-purple-600 text-white font-bold py-4 px-8 rounded-lg text-lg cyber-glow-cyan hover:from-cyan-500 hover:to-purple-500 transition-all duration-300"
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 1, duration: 0.4 }}
-                    whileHover={{ scale: 1.02, boxShadow: '0 0 30px rgba(6, 182, 212, 0.4)', transition: { duration: 0.2, ease: [0.23,1,0.32,1] } }}
+                    transition={{ delay: 0.8, duration: 0.35 }}
+                    whileHover={{ scale: 1.02, boxShadow: '0 0 30px rgba(6, 182, 212, 0.4)', transition: { duration: 0.2, ease: EASE_OUT } }}
                     whileTap={{ scale: 0.96, transition: { duration: 0.1 } }}
                   >
                     START HACKER MODE
@@ -324,18 +355,12 @@ if hack_mode == True:
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -40 }}
-              transition={{ duration: 0.5 }}
+              transition={{ duration: 0.45 }}
             >
               <TerminalWindow title="EVM HACKER SIMULATOR">
                 <div className="space-y-4">
-                  <TypingText text="Loading Python election_hack.py..." delay={0.2} />
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.8, duration: 0.4 }}
-                  >
-                    <CodeBlock code={brokenCode} hasErrors={true} />
-                  </motion.div>
+                  <TypingText text="Loading Python election_hack.py..." delay={0.15} speed={16} />
+                  <CodeLineBlock code={brokenCode} hasErrors lineDelay={420} />
                 </div>
               </TerminalWindow>
 
@@ -344,8 +369,8 @@ if hack_mode == True:
                 className="btn-cyber bg-gradient-to-r from-purple-600 to-cyan-600 text-white font-bold py-3 px-8 rounded-lg cyber-glow-purple hover:from-purple-500 hover:to-cyan-500 transition-all duration-300"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 3, duration: 0.4 }}
-                whileHover={{ scale: 1.02, transition: { duration: 0.2, ease: [0.23,1,0.32,1] } }}
+                transition={{ delay: 1.8, duration: 0.35 }}
+                whileHover={{ scale: 1.02, transition: { duration: 0.2, ease: EASE_OUT } }}
                 whileTap={{ scale: 0.96, transition: { duration: 0.1 } }}
               >
                 FIX 3 SYNTAX ERRORS
@@ -360,17 +385,18 @@ if hack_mode == True:
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -40 }}
-              transition={{ duration: 0.5 }}
+              transition={{ duration: 0.45 }}
             >
               <TerminalWindow title="EVM HACKER SIMULATOR">
                 <div className="space-y-4">
-                  <TypingText text="Fixing syntax errors..." delay={0.1} />
-                  <TypingText text="Compiling..." delay={0.5} />
+                  <TypingText text="Fixing syntax errors..." delay={0.05} speed={16} />
+                  <br />
+                  <TypingText text="Compiling..." delay={0.7} speed={16} />
                   <motion.div
-                    className="flex justify-center"
+                    className="flex justify-center pt-3"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ delay: 1, duration: 0.3 }}
+                    transition={{ delay: 1.3, duration: 0.35 }}
                   >
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-400" />
                   </motion.div>
@@ -386,18 +412,12 @@ if hack_mode == True:
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -40 }}
-              transition={{ duration: 0.5 }}
+              transition={{ duration: 0.45 }}
             >
               <TerminalWindow title="EVM HACKER SIMULATOR">
                 <div className="space-y-4">
-                  <TypingText text="Code fixed! Executing..." delay={0.1} />
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 1, duration: 0.4 }}
-                  >
-                    <CodeBlock code={fixedCode} hasErrors={false} />
-                  </motion.div>
+                  <TypingText text="Code fixed. Running reality check..." delay={0.1} speed={16} />
+                  <CodeLineBlock code={fixedCode} hasErrors={false} lineDelay={620} />
                 </div>
               </TerminalWindow>
             </motion.div>
@@ -410,64 +430,48 @@ if hack_mode == True:
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -40 }}
-              transition={{ duration: 0.5 }}
+              transition={{ duration: 0.45 }}
             >
               <TerminalWindow title="EVM HACKER SIMULATOR">
-                <div className="space-y-3">
-                  {[
-                    { text: 'Loading Python election_hack.py...', type: 'info', delay: 0.2 },
-                    { text: 'Syntax errors fixed successfully.', type: 'success', delay: 0.6 },
-                    { text: 'Searching for WiFi module...', type: 'info', delay: 1.0 },
-                    { text: 'ERROR: No WiFi interface found.', type: 'error', delay: 1.5 },
-                    { text: 'Searching for Bluetooth...', type: 'info', delay: 2.0 },
-                    { text: 'ERROR: No Bluetooth interface found.', type: 'error', delay: 2.5 },
-                    { text: 'Trying internet connection...', type: 'info', delay: 3.0 },
-                    { text: 'ERROR: No internet connection available.', type: 'error', delay: 3.5 },
-                    { text: 'Launching AI super hacker agent...', type: 'info', delay: 4.2 },
-                    { text: 'ERROR: Watching 4 YouTube tutorials is not a security certification.', type: 'error', delay: 5.0 },
-                  ].map((log, i) => (
-                    <TerminalLog key={i} text={log.text} type={log.type} delay={log.delay} />
-                  ))}
-                </div>
+                <AnimatedLogs logs={logs} interval={430} />
               </TerminalWindow>
             </motion.div>
           )}
 
           {stage === 'complete' && (
-  <motion.div
-    key="complete"
-    className="flex flex-col items-center gap-6"
-    initial={{ opacity: 0, y: 40 }}
-    animate={{ opacity: 1, y: 0 }}
-    exit={{ opacity: 0, y: -40 }}
-    transition={{ duration: 0.5 }}
-  >
-    <RealityCheckCard
-      title="Reality Check"
-      achievement="WhatsApp University Certified Hacker™"
-      stats={stats}
-      onRestart={handleRestart}
-      onBack={handleBack}
-    />
+            <motion.div
+              key="complete"
+              className="flex flex-col items-center gap-6"
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -40 }}
+              transition={{ duration: 0.45 }}
+            >
+              <RealityCheckCard
+                title="Reality Check"
+                achievement="WhatsApp University Certified Hacker™"
+                stats={stats}
+                onRestart={handleRestart}
+                onBack={handleBack}
+              />
 
-    <motion.button
-      onClick={() => {
-        document.getElementById("inside-machine")?.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-      }}
-      className="mt-2 inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-violet-600 to-cyan-500 rounded-xl shadow-lg transition-transform duration-150 btn-cyber"
-      whileHover={{ scale: 1.01, y: -2, transition: { duration: 0.2, ease: [0.23,1,0.32,1] } }}
-      whileTap={{ scale: 0.96, transition: { duration: 0.1 } }}
-    >
-      Explore How It Actually Works →
-    </motion.button>
-  </motion.div>
-)}
+              <motion.button
+                onClick={() => {
+                  document.getElementById('inside-machine')?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start',
+                  });
+                }}
+                className="mt-2 inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-violet-600 to-cyan-500 rounded-xl shadow-lg transition-transform duration-150 btn-cyber"
+                whileHover={{ scale: 1.01, y: -2, transition: { duration: 0.2, ease: EASE_OUT } }}
+                whileTap={{ scale: 0.96, transition: { duration: 0.1 } }}
+              >
+                Explore How It Actually Works →
+              </motion.button>
+            </motion.div>
+          )}
         </AnimatePresence>
 
-        {/* Educational Message */}
         <motion.div
           className="mt-12 text-center text-gray-500 text-sm font-mono"
           initial={{ opacity: 0 }}
