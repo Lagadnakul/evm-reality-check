@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 
 const RealityCheckCard = ({ title, stats, achievement, onRestart, onBack }) => {

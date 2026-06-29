@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import TerminalWindow from '../components/hacker/TerminalWindow';
 import CodeBlock from '../components/hacker/CodeBlock';
@@ -73,7 +73,7 @@ const TypingText = ({ text, className = '', delay = 0 }) => {
 };
 
 // Progress bar component
-const ProgressBar = ({ progress, label }) => {
+const ProgressBar = ({ progress }) => {
   return (
     <motion.div
       className="w-full bg-black/20 rounded-full h-2 overflow-hidden"
@@ -178,17 +178,17 @@ if hack_mode == True:
     setTimeout(() => {
       setStage('show_fixed_code');
       setProgress(50);
-    }, 6000);
+    }, 3000);
 
     setTimeout(() => {
       setStage('executing');
       setProgress(70);
-    }, 12000);
+    }, 6000);
 
     setTimeout(() => {
       setStage('complete');
       setProgress(100);
-    }, 22000);
+    }, 13000);
   };
 
   const handleRestart = () => {
@@ -216,10 +216,11 @@ if hack_mode == True:
 
       return () => clearInterval(interval);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stage]);
 
   return (
-    <section id="hacker-mode" className="relative min-h-screen py-20 bg-gradient-to-br from-[#0a0a0f] via-[#0d0d15] to-[#11111a] overflow-hidden">
+    <section id="hacker-mode" className="relative py-20 sm:py-24 bg-gradient-to-br from-[#0a0a0f] via-[#0d0d15] to-[#11111a] overflow-hidden">
       {/* Background */}
       <MatrixParticles />
       <div className="absolute inset-0 cyber-grid opacity-20" />
@@ -289,8 +290,8 @@ if hack_mode == True:
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 1, duration: 0.4 }}
-                    whileHover={{ scale: 1.05, boxShadow: '0 0 30px rgba(6, 182, 212, 0.5)' }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ scale: 1.02, boxShadow: '0 0 30px rgba(6, 182, 212, 0.4)', transition: { duration: 0.2, ease: [0.23,1,0.32,1] } }}
+                    whileTap={{ scale: 0.96, transition: { duration: 0.1 } }}
                   >
                     START HACKER MODE
                   </motion.button>
@@ -327,8 +328,8 @@ if hack_mode == True:
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 3, duration: 0.4 }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.02, transition: { duration: 0.2, ease: [0.23,1,0.32,1] } }}
+                whileTap={{ scale: 0.96, transition: { duration: 0.1 } }}
               >
                 FIX 3 SYNTAX ERRORS
               </motion.button>
@@ -384,7 +385,38 @@ if hack_mode == True:
               </TerminalWindow>
             </motion.div>
           )}
-{stage === 'complete' && (
+
+          {stage === 'executing' && (
+            <motion.div
+              key="executing"
+              className="flex flex-col items-center gap-6"
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -40 }}
+              transition={{ duration: 0.5 }}
+            >
+              <TerminalWindow title="EVM HACKER SIMULATOR">
+                <div className="space-y-3">
+                  {[
+                    { text: 'Loading Python election_hack.py...', type: 'info', delay: 0.2 },
+                    { text: 'Syntax errors fixed successfully.', type: 'success', delay: 0.6 },
+                    { text: 'Searching for WiFi module...', type: 'info', delay: 1.0 },
+                    { text: 'ERROR: No WiFi interface found.', type: 'error', delay: 1.5 },
+                    { text: 'Searching for Bluetooth...', type: 'info', delay: 2.0 },
+                    { text: 'ERROR: No Bluetooth interface found.', type: 'error', delay: 2.5 },
+                    { text: 'Trying internet connection...', type: 'info', delay: 3.0 },
+                    { text: 'ERROR: No internet connection available.', type: 'error', delay: 3.5 },
+                    { text: 'Launching AI super hacker agent...', type: 'info', delay: 4.2 },
+                    { text: 'ERROR: Watching 4 YouTube tutorials is not a security certification.', type: 'error', delay: 5.0 },
+                  ].map((log, i) => (
+                    <TerminalLog key={i} text={log.text} type={log.type} delay={log.delay} />
+                  ))}
+                </div>
+              </TerminalWindow>
+            </motion.div>
+          )}
+
+          {stage === 'complete' && (
   <motion.div
     key="complete"
     className="flex flex-col items-center gap-6"
@@ -394,6 +426,8 @@ if hack_mode == True:
     transition={{ duration: 0.5 }}
   >
     <RealityCheckCard
+      title="Reality Check"
+      achievement="WhatsApp University Certified Hacker™"
       stats={stats}
       onRestart={handleRestart}
       onBack={handleBack}
@@ -406,9 +440,9 @@ if hack_mode == True:
           block: "start",
         });
       }}
-      className="mt-2 inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-purple-600 to-cyan-500 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
-      whileHover={{ scale: 1.03, y: -2 }}
-      whileTap={{ scale: 0.98 }}
+      className="mt-2 inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-violet-600 to-cyan-500 rounded-xl shadow-lg transition-transform duration-150 btn-cyber"
+      whileHover={{ scale: 1.01, y: -2, transition: { duration: 0.2, ease: [0.23,1,0.32,1] } }}
+      whileTap={{ scale: 0.96, transition: { duration: 0.1 } }}
     >
       Explore How It Actually Works →
     </motion.button>

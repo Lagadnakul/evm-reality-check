@@ -1,970 +1,536 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import {
+  CheckCircle2, Lock, Unlock, Timer, RotateCcw,
+  User, ArrowRight, ShieldCheck, Clock
+} from 'lucide-react';
 
-// Candidate Data - Fictional names only
-const candidates = [
-  { id: 1, symbol: '👤', name: 'Aarav Sharma', color: 'from-green-400 to-emerald-400' },
-  { id: 2, symbol: '👤', name: 'Meera Patel', color: 'from-yellow-400 to-orange-400' },
-  { id: 3, symbol: '👤', name: 'Kabir Rao', color: 'from-blue-400 to-indigo-400' },
-  { id: 4, symbol: '👤', name: 'Ananya Singh', color: 'from-purple-400 to-pink-400' },
+const EASE_OUT = [0.23, 1, 0.32, 1];
+const VVPAT_DURATION = 7;   // seconds — voter views slip
+const COOLDOWN_DURATION = 5; // seconds — compressed from real 15s
+
+const CANDIDATES = [
+  { id: 1, name: 'Aarav Sharma',   party: 'Progressive Party',  color: '#22d3ee', bg: 'rgba(34,211,238,0.1)' },
+  { id: 2, name: 'Meera Patel',    party: 'National Front',      color: '#fbbf24', bg: 'rgba(251,191,36,0.1)' },
+  { id: 3, name: 'Kabir Rao',      party: "People's Alliance",   color: '#a78bfa', bg: 'rgba(167,139,250,0.1)' },
+  { id: 4, name: 'Ananya Singh',   party: 'Reform Coalition',    color: '#34d399', bg: 'rgba(52,211,153,0.1)' },
 ];
 
-// Step Data with clear instructions
-const steps = [
-  { id: 1, title: 'Voter Verification', description: 'Verify voter identity to begin' },
-  { id: 2, title: 'Officer Activates Ballot', description: 'Polling officer enables voting' },
-  { id: 3, title: 'Vote Selection', description: 'Select your candidate' },
-  { id: 4, title: 'VVPAT Confirmation', description: 'Verify and confirm your vote' },
-];
-
-// Control Unit Component
-const ControlUnit = ({ currentStep, onVerify, onActivate, isBallotEnabled }) => {
-  // State for this component
-  const [isVerifying, setIsVerifying] = useState(false);
-  const [isActivating, setIsActivating] = useState(false);
-
-  const indicatorStates = {
-    power: true,
-    ready: currentStep >= 1,
-    ballot: currentStep >= 2 && isBallotEnabled,
-    recorded: currentStep >= 4,
-  };
-
-  const handleVerify = () => {
-    setIsVerifying(true);
-    setTimeout(() => {
-      setIsVerifying(false);
-      onVerify();
-    }, 1000);
-  };
-
-  const handleActivate = () => {
-    setIsActivating(true);
-    setTimeout(() => {
-      setIsActivating(false);
-      onActivate();
-    }, 1000);
-  };
+// ─── Officer Control Unit ──────────────────────────────────────────────────
+const ControlUnit = ({ phase, onEnable, cooldown }) => {
+  const indicators = [
+    { label: 'POWER',    active: true,                                                         color: '#10b981' },
+    { label: 'READY',    active: true,                                                         color: '#22d3ee' },
+    { label: 'BALLOT',   active: ['ballot_active', 'voted', 'slip_viewing'].includes(phase),   color: '#a78bfa' },
+    { label: 'RECORDED', active: ['slip_viewing', 'cooldown'].includes(phase),                 color: '#10b981' },
+  ];
 
   return (
-    <motion.div
-      className="relative w-72 h-80 machine-panel-glow rounded-2xl p-6 flex flex-col"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: 'easeOut' }}
-    >
+    <div className="flex flex-col h-full bg-bg-1 border border-white/8 rounded-2xl overflow-hidden">
       {/* Header */}
-      <div className="text-center mb-4">
-        <motion.h3
-          className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 tracking-wider"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-        >
-          CONTROL UNIT
-        </motion.h3>
-        <motion.div
-          className="w-full h-0.5 bg-gradient-to-r from-cyan-500/30 to-purple-500/30 mt-2"
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: 1 }}
-          transition={{ delay: 0.3, duration: 0.5 }}
-        />
+      <div className="px-5 py-4 border-b border-white/6">
+        <div className="flex items-center gap-2 mb-1">
+          <div className="w-2 h-2 rounded-full bg-cyber-emerald" style={{ boxShadow: '0 0 6px #10b981' }} />
+          <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest">Polling Officer</span>
+        </div>
+        <h3 className="text-sm font-bold text-white tracking-wide">CONTROL UNIT</h3>
       </div>
 
       {/* Indicators */}
-      <div className="flex-1 space-y-3 mb-4">
-        <div className="space-y-2">
-          {[
-            { label: 'POWER', state: indicatorStates.power, color: 'green' },
-            { label: 'READY', state: indicatorStates.ready, color: 'cyan' },
-            { label: 'BALLOT', state: indicatorStates.ballot, color: 'purple' },
-            { label: 'RECORDED', state: indicatorStates.recorded, color: 'green' },
-          ].map((indicator, index) => (
+      <div className="px-5 py-4 space-y-2.5 flex-1">
+        {indicators.map((ind) => (
+          <div key={ind.label} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.05]">
             <motion.div
-              key={index}
-              className="flex items-center gap-3 p-2 rounded-lg bg-white/5 border border-white/10"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 + index * 0.1, duration: 0.4 }}
-              whileHover={{ scale: 1.01, borderColor: 'rgba(6, 182, 212, 0.3)' }}
-            >
-              <motion.div
-                className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                  indicator.state ? `bg-${indicator.color}-400` : 'bg-gray-600'
-                }`}
-                animate={indicator.state ? {
-                  boxShadow: [`0 0 5px var(--accent-${indicator.color})`, `0 0 15px var(--accent-${indicator.color})`]
-                } : {}}
-                transition={{ duration: 1, repeat: Infinity }}
-              />
-              <span className={`text-xs font-mono ${
-                indicator.state ? `text-${indicator.color}-300` : 'text-gray-500'
-              }`}>
-                {indicator.label}
-              </span>
-              <motion.div
-                className={`flex-1 h-1 rounded-full ml-2 ${
-                  indicator.state ? `bg-${indicator.color}/20` : 'bg-gray-700/20'
-                }`}
-                animate={indicator.state ? { opacity: [0.5, 1, 0.5] } : {}}
-                transition={{ duration: 2, repeat: Infinity }}
-              />
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Action Buttons */}
-        <div className="space-y-2">
-          {/* Step 1: Verify Voter */}
-          {currentStep === 1 && (
-            <motion.button
-              onClick={handleVerify}
-              disabled={isVerifying}
-              className="w-full py-3 rounded-xl font-bold text-sm bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-400/40 text-cyan-300 hover:bg-cyan-500/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8, duration: 0.4 }}
-              whileHover={{ scale: 1.02, boxShadow: '0 0 15px rgba(6, 182, 212, 0.3)' }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <motion.div
-                className="flex items-center justify-center gap-2"
-                animate={isVerifying ? { opacity: [1, 0.5, 1] } : {}}
-                transition={{ duration: 0.5, repeat: Infinity }}
-              >
-                {isVerifying ? (
-                  <motion.span
-                    className="text-xs"
-                    animate={{ rotate: [0, 360] }}
-                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                  >
-                    ⏳
-                  </motion.span>
-                ) : (
-                  <span>👆 Verify Voter</span>
-                )}
-              </motion.div>
-            </motion.button>
-          )}
-
-          {/* Step 2: Activate Ballot */}
-          {currentStep === 2 && (
-            <motion.button
-              onClick={handleActivate}
-              disabled={isActivating}
-              className="w-full py-3 rounded-xl font-bold text-sm bg-gradient-to-r from-cyan-500/30 to-purple-500/30 border border-cyan-400/60 text-cyan-200 hover:bg-cyan-500/40 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8, duration: 0.4 }}
-              whileHover={{ scale: 1.02, boxShadow: '0 0 20px rgba(6, 182, 212, 0.4)' }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <motion.div
-                className="flex items-center justify-center gap-2"
-                animate={isActivating ? { scale: [1, 1.02, 1] } : {}}
-                transition={{ duration: 1, repeat: Infinity }}
-              >
-                {isActivating ? (
-                  <motion.span
-                    className="text-xs"
-                    animate={{ rotate: [0, 360] }}
-                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                  >
-                    ⏳
-                  </motion.span>
-                ) : (
-                  <span>👆 Activate Ballot</span>
-                )}
-              </motion.div>
-            </motion.button>
-          )}
-
-          {/* Steps 3-4: Ballot Active */}
-          {currentStep >= 3 && (
-            <motion.div
-              className="w-full py-3 rounded-xl font-bold text-sm bg-green-500/10 border border-green-400/30 text-green-300 flex items-center justify-center"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.9, duration: 0.4 }}
-            >
-              <motion.span
-                className="text-xs mr-2"
-                animate={{ opacity: [0.5, 1, 0.5] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-              >
-                ✓
-              </motion.span>
-              Ballot Active
-            </motion.div>
-          )}
-        </div>
+              className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+              style={{ backgroundColor: ind.active ? ind.color : 'rgba(255,255,255,0.15)' }}
+              animate={ind.active ? { boxShadow: [`0 0 5px ${ind.color}`, `0 0 12px ${ind.color}`, `0 0 5px ${ind.color}`] } : {}}
+              transition={{ duration: 1.5, repeat: Infinity }}
+            />
+            <span className={`text-[11px] font-mono ${ind.active ? 'text-white' : 'text-gray-600'}`}>{ind.label}</span>
+            <div className="flex-1 h-px" style={{ background: ind.active ? `linear-gradient(90deg, ${ind.color}40, transparent)` : 'rgba(255,255,255,0.04)' }} />
+          </div>
+        ))}
       </div>
 
-      {/* Connection Point */}
-      <motion.div
-        className="absolute -right-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-purple-500 flex items-center justify-center border-2 border-white/20"
-        animate={currentStep >= 2 ? {
-          boxShadow: ['0 0 10px rgba(6, 182, 212, 0.5)', '0 0 20px rgba(168, 85, 247, 0.5)']
-        } : { opacity: 0.3 }}
-        transition={{ duration: 1, repeat: Infinity }}
-      >
-        <motion.span
-          className="text-white text-lg"
-          animate={currentStep >= 2 ? { scale: [1, 1.1, 1] } : {}}
-          transition={{ duration: 1, repeat: Infinity }}
-        >
-          →
-        </motion.span>
-      </motion.div>
-
-      {/* Corner Accents */}
-      <div className="absolute -top-1 -left-1 w-3 h-3 border-l-2 border-t-2 border-cyan-500/30 rounded-br" />
-      <div className="absolute -bottom-1 -left-1 w-3 h-3 border-l-2 border-b-2 border-cyan-500/30 rounded-tr" />
-      <div className="absolute -top-1 -right-1 w-3 h-3 border-r-2 border-t-2 border-purple-500/30 rounded-bl" />
-      <div className="absolute -bottom-1 -right-1 w-3 h-3 border-r-2 border-b-2 border-purple-500/30 rounded-tl" />
-    </motion.div>
+      {/* Action area */}
+      <div className="px-5 pb-5">
+        <AnimatePresence mode="wait">
+          {phase === 'waiting' && (
+            <motion.button
+              key="enable"
+              onClick={onEnable}
+              className="w-full py-3 rounded-xl text-sm font-semibold bg-cyber-cyan/10 border border-cyber-cyan/30 text-cyber-cyan hover:bg-cyber-cyan/15 transition-colors flex items-center justify-center gap-2"
+              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.25, ease: EASE_OUT }}
+              whileTap={{ scale: 0.97, transition: { duration: 0.1 } }}
+            >
+              <Unlock size={14} /> Enable Ballot Unit
+            </motion.button>
+          )}
+          {phase === 'ballot_active' && (
+            <motion.div
+              key="active"
+              className="w-full py-3 rounded-xl text-sm font-semibold bg-cyber-violet/10 border border-cyber-violet/20 text-cyber-violet text-center"
+              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <motion.div className="w-1.5 h-1.5 rounded-full bg-cyber-violet" animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1, repeat: Infinity }} />
+                Ballot Unit Active
+              </div>
+            </motion.div>
+          )}
+          {phase === 'voted' && (
+            <motion.div
+              key="voted"
+              className="w-full py-3 rounded-xl text-sm font-semibold bg-cyber-emerald/10 border border-cyber-emerald/20 text-cyber-emerald text-center flex items-center justify-center gap-2"
+              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+            >
+              <CheckCircle2 size={14} /> Vote Registered
+            </motion.div>
+          )}
+          {phase === 'slip_viewing' && (
+            <motion.div
+              key="slip"
+              className="w-full py-3 rounded-xl text-sm font-semibold bg-cyber-emerald/10 border border-cyber-emerald/20 text-cyber-emerald text-center flex items-center justify-center gap-2"
+              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+            >
+              <ShieldCheck size={14} /> Verifying VVPAT
+            </motion.div>
+          )}
+          {phase === 'cooldown' && (
+            <motion.div
+              key="cooldown"
+              className="w-full py-3 rounded-xl text-sm font-semibold bg-white/5 border border-white/10 text-gray-400 text-center"
+              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <Clock size={13} />
+                <span>Next voter: <span className="text-white tabular-nums">{cooldown}s</span></span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
   );
 };
 
-// Ballot Unit Component
-const BallotUnit = ({ isActive, selectedCandidate, onSelectCandidate, currentStep }) => {
-  const [isAnimating, setIsAnimating] = useState(false);
-
-  useEffect(() => {
-    if (currentStep === 3) {
-      setIsAnimating(true);
-      const timer = setTimeout(() => setIsAnimating(false), 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [currentStep]);
+// ─── Ballot Unit ───────────────────────────────────────────────────────────
+const BallotUnit = ({ phase, onVote, selected }) => {
+  const isActive = phase === 'ballot_active';
+  const isLocked = ['voted', 'slip_viewing', 'cooldown'].includes(phase);
+  const isWaiting = phase === 'waiting';
 
   return (
-    <motion.div
-      className="relative w-80 h-[480px] machine-panel-glow rounded-2xl p-6 flex flex-col"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: 'easeOut' }}
-    >
+    <div className="flex flex-col h-full bg-bg-1 border border-white/8 rounded-2xl overflow-hidden">
       {/* Header */}
-      <div className="text-center mb-4">
-        <motion.h3
-          className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 tracking-wider"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-        >
-          BALLOT UNIT
-        </motion.h3>
-        <motion.div
-          className="w-full h-0.5 bg-gradient-to-r from-cyan-500/30 to-purple-500/30 mt-2"
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: 1 }}
-          transition={{ delay: 0.3, duration: 0.5 }}
-        />
+      <div className="px-5 py-4 border-b border-white/6">
+        <h3 className="text-sm font-bold text-white tracking-wide mb-2">BALLOT UNIT</h3>
+
+        {/* Status bar */}
+        <AnimatePresence mode="wait">
+          {isWaiting && (
+            <motion.div key="w" className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.07]"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <Lock size={11} className="text-gray-500" />
+              <span className="text-[11px] font-mono text-gray-500">LOCKED — AWAITING OFFICER</span>
+            </motion.div>
+          )}
+          {isActive && (
+            <motion.div key="a" className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-cyber-emerald/10 border border-cyber-emerald/25"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <motion.div className="w-1.5 h-1.5 rounded-full bg-cyber-emerald" animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 0.8, repeat: Infinity }} />
+              <span className="text-[11px] font-mono text-cyber-emerald">READY TO VOTE</span>
+            </motion.div>
+          )}
+          {isLocked && (
+            <motion.div key="l" className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-cyber-violet/10 border border-cyber-violet/25"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <Lock size={11} className="text-cyber-violet" />
+              <span className="text-[11px] font-mono text-cyber-violet">VOTE RECORDED — LOCKED</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Display Area */}
-      <div className="mb-4">
-        <motion.div
-          className="h-12 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center mb-4"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-        >
-          <motion.span
-            className="text-sm font-mono text-cyan-300/80"
-            animate={{ opacity: [0.5, 1, 0.5] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
-            {currentStep === 3 ? (
-              isActive ? 'SELECT YOUR CANDIDATE' : 'WAITING FOR ACTIVATION'
-            ) : currentStep > 3 ? (
-              'VOTE CONFIRMED'
-            ) : (
-              'WAITING FOR ACTIVATION'
-            )}
-          </motion.span>
-        </motion.div>
-      </div>
-
-      {/* Candidate List - Properly sized */}
-      <div className="flex-1 space-y-2 overflow-hidden">
-        {candidates.map((candidate) => {
-          const isSelected = selectedCandidate?.id === candidate.id;
-          const isDisabled = (selectedCandidate && !isSelected) || currentStep !== 3;
+      {/* Candidate list */}
+      <div className="flex-1 px-4 py-4 space-y-2 overflow-auto">
+        {CANDIDATES.map((c, i) => {
+          const isSelected = selected?.id === c.id;
+          const canVote = isActive && !selected;
 
           return (
             <motion.button
-              key={candidate.id}
-              onClick={() => !isDisabled && onSelectCandidate(candidate)}
-              disabled={isDisabled}
-              className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all duration-300 border ${
-                isSelected
-                  ? `border-${candidate.color.split('-')[1]}-400 bg-gradient-to-r ${candidate.color}/10`
-                  : 'border-white/10 bg-white/5 hover:border-cyan-400/30'
-              }`}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.5 + candidates.indexOf(candidate) * 0.1, duration: 0.4 }}
-              whileHover={!isDisabled ? { scale: 1.01, borderColor: 'rgba(6, 182, 212, 0.4)' } : {}}
-              whileTap={!isDisabled ? { scale: 0.99 } : {}}
-              style={{
-                cursor: isDisabled ? 'not-allowed' : 'pointer',
-                opacity: isDisabled ? 0.5 : 1
+              key={c.id}
+              onClick={() => canVote && onVote(c)}
+              disabled={!canVote && !isSelected}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition-colors text-left"
+              style={isSelected ? {
+                background: c.bg,
+                borderColor: `${c.color}50`,
+                boxShadow: `0 0 20px ${c.color}18`,
+              } : {
+                background: 'rgba(255,255,255,0.025)',
+                borderColor: isActive && !selected ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.04)',
+                opacity: !isActive && !isSelected ? 0.45 : 1,
               }}
+              whileHover={canVote ? { y: -1, borderColor: `${c.color}40`, transition: { duration: 0.15 } } : {}}
+              whileTap={canVote ? { scale: 0.98, transition: { duration: 0.08 } } : {}}
             >
-              {/* Candidate Symbol */}
-              <motion.div
-                className={`text-xl flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br ${candidate.color}/20 flex items-center justify-center ${
-                  isSelected ? 'text-white ring-2 ring-' + candidate.color.split('-')[1] + '-400' : 'text-white/60'
-                }`}
-                animate={isSelected ? { scale: [1, 1.05, 1] } : {}}
-                transition={{ duration: 0.5, repeat: Infinity }}
+              {/* Number badge */}
+              <div
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold flex-shrink-0"
+                style={{ background: isSelected ? c.bg : 'rgba(255,255,255,0.05)', color: isSelected ? c.color : 'rgba(255,255,255,0.3)', border: `1px solid ${isSelected ? c.color + '30' : 'rgba(255,255,255,0.08)'}` }}
               >
-                {candidate.symbol}
-              </motion.div>
+                {i + 1}
+              </div>
 
-              {/* Candidate Name */}
-              <motion.span
-                className={`flex-1 text-left font-medium text-sm ${
-                  isSelected ? 'text-white' : 'text-gray-300'
-                }`}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.6 + candidates.indexOf(candidate) * 0.1 }}
-              >
-                {candidate.name}
-              </motion.span>
+              {/* Name & party */}
+              <div className="flex-1 min-w-0">
+                <p className={`text-sm font-semibold ${isSelected ? 'text-white' : 'text-gray-300'}`}>{c.name}</p>
+                <p className="text-[11px] text-gray-600 truncate">{c.party}</p>
+              </div>
 
-              {/* Vote Button */}
-              {!isSelected && (
-                <motion.div
-                  className="w-12 h-8 rounded-full bg-gradient-to-r from-cyan-500/20 to-cyan-500/30 border border-cyan-400/40 flex items-center justify-center flex-shrink-0"
-                  whileHover={!isDisabled ? { scale: 1.05, backgroundColor: 'rgba(6, 182, 212, 0.4)' } : {}}
-                >
-                  <span className={`text-cyan-300 text-xs font-bold ${isDisabled ? 'opacity-30' : ''}`}>
+              {/* State indicator */}
+              <div className="flex-shrink-0">
+                {isSelected ? (
+                  <motion.div
+                    initial={{ scale: 0 }} animate={{ scale: 1 }}
+                    transition={{ type: 'spring', stiffness: 500, damping: 20 }}
+                  >
+                    <CheckCircle2 size={18} style={{ color: c.color }} />
+                  </motion.div>
+                ) : canVote ? (
+                  <div className="px-3 py-1 rounded-full text-xs font-semibold border"
+                    style={{ color: c.color, borderColor: `${c.color}30`, background: c.bg }}>
                     Vote
-                  </span>
-                </motion.div>
-              )}
-
-              {isSelected && (
-                <motion.div
-                  className="w-12 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-purple-400 flex items-center justify-center flex-shrink-0"
-                  animate={{ scale: [1, 1.05, 1] }}
-                  transition={{ duration: 0.5, repeat: Infinity }}
-                >
-                  <span className="text-white text-sm">✓</span>
-                </motion.div>
-              )}
+                  </div>
+                ) : null}
+              </div>
             </motion.button>
           );
         })}
       </div>
 
-      {/* Connection Points */}
-      <motion.div
-        className="absolute -left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center border-2 border-white/20"
-        animate={isActive ? {
-          boxShadow: ['0 0 10px rgba(168, 85, 247, 0.5)', '0 0 20px rgba(6, 182, 212, 0.5)']
-        } : { opacity: 0.3 }}
-        transition={{ duration: 1, repeat: Infinity }}
-      >
-        <motion.span
-          className="text-white text-lg"
-          animate={isActive ? { scale: [1, 1.1, 1] } : {}}
-          transition={{ duration: 1, repeat: Infinity }}
-        >
-          ←
-        </motion.span>
-      </motion.div>
-
-      <motion.div
-        className="absolute -right-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-purple-500 flex items-center justify-center border-2 border-white/20"
-        animate={selectedCandidate ? {
-          boxShadow: ['0 0 10px rgba(6, 182, 212, 0.5)', '0 0 20px rgba(168, 85, 247, 0.5)']
-        } : { opacity: 0.3 }}
-        transition={{ duration: 1, repeat: Infinity }}
-      >
-        {selectedCandidate && (
-          <motion.span
-            className="text-white text-lg"
-            animate={{ scale: [1, 1.1, 1] }}
-            transition={{ duration: 1, repeat: Infinity }}
-          >
-            →
-          </motion.span>
-        )}
-      </motion.div>
-
-      {/* Corner Accents */}
-      <div className="absolute -top-1 -left-1 w-3 h-3 border-l-2 border-t-2 border-purple-500/30 rounded-br" />
-      <div className="absolute -bottom-1 -left-1 w-3 h-3 border-l-2 border-b-2 border-purple-500/30 rounded-tr" />
-      <div className="absolute -top-1 -right-1 w-3 h-3 border-r-2 border-t-2 border-cyan-500/30 rounded-bl" />
-      <div className="absolute -bottom-1 -right-1 w-3 h-3 border-r-2 border-b-2 border-cyan-500/30 rounded-tl" />
-    </motion.div>
+      {/* Rate-limit note */}
+      <div className="px-5 py-3 border-t border-white/[0.04]">
+        <p className="text-[10px] text-gray-700 font-mono text-center">
+          Max 4 votes/min · Vote locks immediately on selection
+        </p>
+      </div>
+    </div>
   );
 };
 
-// VVPAT Component
-const VVPAT = ({ selectedCandidate, currentStep }) => {
-  const [showSlip, setShowSlip] = useState(false);
-  const [slipDropped, setSlipDropped] = useState(false);
-
-  useEffect(() => {
-    if (currentStep === 4 && selectedCandidate) {
-      // Show slip immediately when step 4 starts
-      setShowSlip(true);
-      // After 4 seconds, drop the slip
-      const dropTimer = setTimeout(() => {
-        setSlipDropped(true);
-      }, 4000);
-      return () => clearTimeout(dropTimer);
-    } else {
-      setShowSlip(false);
-      setSlipDropped(false);
-    }
-  }, [currentStep, selectedCandidate]);
+// ─── VVPAT Viewer ─────────────────────────────────────────────────────────
+const VVPATViewer = ({ phase, selected, vvpatSeconds }) => {
+  const showSlip = phase === 'slip_viewing';
+  const slipCollected = phase === 'cooldown';
+  const progress = showSlip ? ((VVPAT_DURATION - vvpatSeconds) / VVPAT_DURATION) * 100 : 0;
 
   return (
-    <motion.div
-      className="relative w-72 h-80 machine-panel-glow rounded-2xl p-6 flex flex-col"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: 'easeOut' }}
-    >
+    <div className="flex flex-col h-full bg-bg-1 border border-white/8 rounded-2xl overflow-hidden">
       {/* Header */}
-      <div className="text-center mb-4">
-        <motion.h3
-          className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 tracking-wider"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-        >
-          VVPAT VIEWER
-        </motion.h3>
-        <motion.div
-          className="w-full h-0.5 bg-gradient-to-r from-cyan-500/30 to-purple-500/30 mt-2"
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: 1 }}
-          transition={{ delay: 0.3, duration: 0.5 }}
-        />
+      <div className="px-5 py-4 border-b border-white/6">
+        <h3 className="text-sm font-bold text-white tracking-wide mb-0.5">VVPAT VIEWER</h3>
+        <p className="text-[10px] text-gray-600 font-mono">Voter Verified Paper Audit Trail</p>
       </div>
 
-      {/* Viewing Window */}
-      <div className="flex-1 relative overflow-hidden rounded-xl bg-white/5 border border-white/10 mb-4">
-        {/* Window Glass */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/5 to-transparent pointer-events-none" />
+      {/* Viewing window */}
+      <div className="flex-1 px-5 py-4 flex flex-col gap-3">
+        <div className="flex-1 relative rounded-xl bg-bg-2 border border-white/[0.06] overflow-hidden flex items-center justify-center">
+          {/* Scan line */}
+          <motion.div
+            className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyber-cyan/40 to-transparent pointer-events-none"
+            animate={{ y: [0, 200, 0] }}
+            transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+          />
 
-        {/* Slip Animation */}
+          <AnimatePresence mode="wait">
+            {!showSlip && !slipCollected && (
+              <motion.div key="wait" className="text-center p-6"
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <div className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center mx-auto mb-3">
+                  <motion.div className="w-2 h-2 rounded-full bg-cyber-cyan/40"
+                    animate={{ opacity: [0.4, 1, 0.4] }} transition={{ duration: 1.5, repeat: Infinity }} />
+                </div>
+                <p className="text-xs text-gray-600 font-mono">WAITING FOR VOTE</p>
+              </motion.div>
+            )}
+
+            {showSlip && selected && (
+              <motion.div key="slip"
+                className="w-full h-full p-4 flex flex-col"
+                initial={{ y: -80, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 80, opacity: 0 }}
+                transition={{ duration: 0.5, ease: EASE_OUT }}
+              >
+                {/* Paper slip */}
+                <div className="flex-1 bg-white rounded-lg p-4 flex flex-col items-center justify-center shadow-lg">
+                  <p className="text-[9px] text-gray-500 uppercase tracking-widest mb-2 font-mono">VVPAT Slip</p>
+                  <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mb-2">
+                    <User size={16} className="text-gray-500" />
+                  </div>
+                  <p className="text-sm font-bold text-gray-800 text-center leading-tight">{selected.name}</p>
+                  <p className="text-[10px] text-gray-500 text-center mt-1">{selected.party}</p>
+                  <div className="mt-3 pt-3 border-t border-gray-100 w-full text-center">
+                    <p className="text-[9px] text-gray-400 font-mono">Electronic Vote Verification</p>
+                  </div>
+                </div>
+
+                {/* 7-second countdown */}
+                <div className="mt-3">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[10px] text-gray-500 font-mono">Voter viewing slip</span>
+                    <span className="text-[10px] text-cyber-amber font-mono tabular-nums flex items-center gap-1">
+                      <Timer size={10} />{vvpatSeconds}s
+                    </span>
+                  </div>
+                  <div className="h-1 rounded-full bg-bg-3 overflow-hidden">
+                    <motion.div
+                      className="h-full rounded-full bg-gradient-to-r from-cyber-amber to-cyber-emerald"
+                      style={{ width: `${100 - progress}%` }}
+                      transition={{ duration: 0.5, ease: 'linear' }}
+                    />
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {slipCollected && selected && (
+              <motion.div key="collected" className="text-center p-4"
+                initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4, ease: EASE_OUT }}>
+                <div className="w-10 h-10 rounded-full bg-cyber-emerald/15 border border-cyber-emerald/30 flex items-center justify-center mx-auto mb-3">
+                  <CheckCircle2 size={20} className="text-cyber-emerald" />
+                </div>
+                <p className="text-xs font-semibold text-cyber-emerald">SLIP SECURED</p>
+                <p className="text-[10px] text-gray-600 mt-1 font-mono">{selected.name}</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Sealed box */}
+        <motion.div
+          className="rounded-xl px-4 py-3 text-center border transition-all duration-500"
+          style={slipCollected ? {
+            background: 'rgba(52,211,153,0.06)',
+            borderColor: 'rgba(52,211,153,0.25)',
+          } : {
+            background: 'rgba(255,255,255,0.025)',
+            borderColor: 'rgba(255,255,255,0.06)',
+          }}
+        >
+          <p className="text-[10px] font-mono" style={{ color: slipCollected ? '#34d399' : '#4b5563' }}>
+            {slipCollected ? '● SLIP IN SEALED BOX' : '○ SEALED BOX'}
+          </p>
+        </motion.div>
+      </div>
+    </div>
+  );
+};
+
+// ─── Connection Arrow ──────────────────────────────────────────────────────
+const ConnectionArrow = ({ active }) => (
+  <div className="hidden lg:flex items-center justify-center w-8 flex-shrink-0">
+    <motion.div
+      animate={active ? { opacity: [0.4, 1, 0.4] } : { opacity: 0.15 }}
+      transition={{ duration: 1.5, repeat: Infinity }}
+    >
+      <ArrowRight size={16} className={active ? 'text-cyber-cyan' : 'text-gray-700'} />
+    </motion.div>
+  </div>
+);
+
+// ─── Step Info Bar ─────────────────────────────────────────────────────────
+const stepInfo = {
+  waiting:      { n: 1, label: 'Officer enables the Ballot Unit from the Control Unit', color: 'text-cyber-cyan' },
+  ballot_active:{ n: 2, label: 'Voter presses their candidate\'s button — vote locks instantly', color: 'text-cyber-violet' },
+  voted:        { n: 3, label: 'Ballot unit is locked. VVPAT slip appears in the window', color: 'text-cyber-amber' },
+  slip_viewing: { n: 3, label: `Voter verifies the slip for ${VVPAT_DURATION} seconds, then it drops into the sealed box`, color: 'text-cyber-amber' },
+  cooldown:     { n: 4, label: 'Slip secured. System cooling down before next voter (rate limit)', color: 'text-cyber-emerald' },
+};
+
+// ─── Main Component ────────────────────────────────────────────────────────
+const VotingDemoSection = () => {
+  const [phase, setPhase] = useState('waiting');  // waiting | ballot_active | voted | slip_viewing | cooldown
+  const [selected, setSelected] = useState(null);
+  const [vvpatSeconds, setVvpatSeconds] = useState(VVPAT_DURATION);
+  const [cooldownSeconds, setCooldownSeconds] = useState(COOLDOWN_DURATION);
+
+  // VVPAT countdown
+  useEffect(() => {
+    if (phase !== 'slip_viewing') return;
+    setVvpatSeconds(VVPAT_DURATION);
+    const id = setInterval(() => {
+      setVvpatSeconds((s) => {
+        if (s <= 1) { clearInterval(id); setPhase('cooldown'); return 0; }
+        return s - 1;
+      });
+    }, 1000);
+    return () => clearInterval(id);
+  }, [phase]);
+
+  // Cooldown countdown
+  useEffect(() => {
+    if (phase !== 'cooldown') return;
+    setCooldownSeconds(COOLDOWN_DURATION);
+    const id = setInterval(() => {
+      setCooldownSeconds((s) => {
+        if (s <= 1) { clearInterval(id); return 0; }
+        return s - 1;
+      });
+    }, 1000);
+    return () => clearInterval(id);
+  }, [phase]);
+
+  const handleEnable = useCallback(() => setPhase('ballot_active'), []);
+
+  const handleVote = useCallback((candidate) => {
+    setSelected(candidate);
+    setPhase('voted');
+    // After 1.2s: transition to slip_viewing (VVPAT shows)
+    setTimeout(() => setPhase('slip_viewing'), 1200);
+  }, []);
+
+  const handleReset = useCallback(() => {
+    setPhase('waiting');
+    setSelected(null);
+    setVvpatSeconds(VVPAT_DURATION);
+    setCooldownSeconds(COOLDOWN_DURATION);
+  }, []);
+
+  const info = stepInfo[phase] ?? stepInfo.waiting;
+
+  return (
+    <section id="voting-demo" className="relative py-24 bg-bg-0 overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0 [background-image:linear-gradient(rgba(167,139,250,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(167,139,250,0.02)_1px,transparent_1px)] [background-size:48px_48px] pointer-events-none" />
+      <motion.div className="absolute top-1/3 left-1/4 w-80 h-80 bg-cyber-violet/6 rounded-full blur-[100px] pointer-events-none"
+        animate={{ x: [0, 30, 0], y: [0, -20, 0] }} transition={{ duration: 12, repeat: Infinity }} />
+      <motion.div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-cyber-cyan/5 rounded-full blur-[120px] pointer-events-none"
+        animate={{ x: [0, -25, 0], y: [0, 25, 0] }} transition={{ duration: 10, repeat: Infinity }} />
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        {/* Header */}
+        <div className="text-center mb-12">
+          <motion.span
+            className="inline-block px-4 py-1.5 bg-cyber-violet/10 border border-cyber-violet/20 rounded-full text-xs font-semibold uppercase tracking-widest text-cyber-violet mb-5"
+            initial={{ opacity: 0, scale: 0.92 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}
+          >
+            Interactive Demo
+          </motion.span>
+          <motion.h2
+            className="font-display text-4xl md:text-5xl font-extrabold tracking-tight text-white mb-4"
+            initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+            transition={{ delay: 0.07, ease: EASE_OUT, duration: 0.55 }}
+            style={{ textWrap: 'balance' }}
+          >
+            Experience the{' '}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyber-violet to-cyber-cyan">Voting Process</span>
+          </motion.h2>
+          <motion.p
+            className="text-gray-400 text-lg max-w-2xl mx-auto"
+            initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+            transition={{ delay: 0.12, ease: EASE_OUT, duration: 0.55 }}
+            style={{ textWrap: 'pretty' }}
+          >
+            A realistic simulation of how an EVM works — from officer activation to slip verification. Vote locks the moment you press the button.
+          </motion.p>
+        </div>
+
+        {/* Step info pill */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={phase}
+            className="flex items-center justify-center mb-8"
+            initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.25, ease: EASE_OUT }}
+          >
+            <div className="inline-flex items-center gap-3 px-5 py-2.5 bg-bg-1 border border-white/8 rounded-full">
+              <span className="text-xs font-mono text-gray-600">STEP {info.n}/4</span>
+              <div className="w-px h-3 bg-white/10" />
+              <span className={`text-xs font-medium ${info.color}`}>{info.label}</span>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+
+        {/* EVM Panel Layout */}
+        <motion.div
+          className="flex flex-col lg:flex-row items-stretch gap-3 lg:gap-0 mb-10"
+          initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 0.6, ease: EASE_OUT }}
+        >
+          {/* Control Unit */}
+          <div className="lg:w-[280px] flex-shrink-0 min-h-[340px]">
+            <ControlUnit phase={phase} onEnable={handleEnable} cooldown={cooldownSeconds} />
+          </div>
+
+          <ConnectionArrow active={phase !== 'waiting'} />
+
+          {/* Ballot Unit */}
+          <div className="flex-1 min-h-[380px]">
+            <BallotUnit phase={phase} onVote={handleVote} selected={selected} />
+          </div>
+
+          <ConnectionArrow active={['voted', 'slip_viewing', 'cooldown'].includes(phase)} />
+
+          {/* VVPAT */}
+          <div className="lg:w-[260px] flex-shrink-0 min-h-[340px]">
+            <VVPATViewer phase={phase} selected={selected} vvpatSeconds={vvpatSeconds} />
+          </div>
+        </motion.div>
+
+        {/* Completion + restart */}
         <AnimatePresence>
-          {showSlip && selectedCandidate && (
+          {phase === 'cooldown' && cooldownSeconds === 0 && (
             <motion.div
-              className="absolute inset-4 bg-white/90 rounded shadow-lg p-3"
-              initial={{ y: -100, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 100, opacity: 0 }}
-              transition={{ duration: 0.5, ease: 'easeInOut' }}
+              className="text-center"
+              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+              transition={{ duration: 0.4, ease: EASE_OUT }}
             >
-              {/* Slip Content */}
-              <div className="text-center space-y-2">
-                <div className="text-2xl">{selectedCandidate.symbol}</div>
-                <div className="text-sm font-bold text-gray-800">{selectedCandidate.name}</div>
-                <div className="text-xs text-gray-600">Electronic Vote Verification</div>
+              <div className="inline-flex flex-col items-center gap-4 p-8 bg-bg-1 border border-white/8 rounded-2xl">
+                <div className="w-14 h-14 rounded-full bg-cyber-emerald/10 border border-cyber-emerald/25 flex items-center justify-center">
+                  <CheckCircle2 size={28} className="text-cyber-emerald" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">Simulation Complete</h3>
+                  <p className="text-sm text-gray-400 mt-1">
+                    {selected?.name} — vote recorded and verified.
+                  </p>
+                </div>
+                <motion.button
+                  onClick={handleReset}
+                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-cyber-violet/10 border border-cyber-violet/25 text-cyber-violet text-sm font-semibold rounded-xl hover:bg-cyber-violet/15 transition-colors"
+                  whileTap={{ scale: 0.97, transition: { duration: 0.1 } }}
+                >
+                  <RotateCcw size={14} /> Try Again
+                </motion.button>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Waiting Message */}
-        {!showSlip && (
-          <motion.div
-            className="absolute inset-0 flex items-center justify-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-          >
-            <motion.span
-              className="text-gray-400 text-sm font-mono"
-              animate={{ opacity: [0.5, 1, 0.5] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              {currentStep < 3 ? 'WAITING FOR VOTE' : 'PROCESSING...'}
-            </motion.span>
-          </motion.div>
-        )}
-
-        {/* Scan Line Effect */}
+        {/* Info callout */}
         <motion.div
-          className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent"
-          animate={{ y: [0, 140, 0], opacity: [0.8, 0.4, 0.8] }}
-          transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-        />
-      </div>
-
-      {/* Sealed Box Area */}
-      <motion.div
-        className="relative h-12 rounded-xl bg-gradient-to-r from-cyan-500/5 to-purple-500/5 border border-cyan-500/20 flex items-center justify-center"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.6, duration: 0.4 }}
-      >
-        <motion.span
-          className="text-xs font-mono text-cyan-300/80"
-          animate={{ opacity: [0.5, 1, 0.5] }}
-          transition={{ duration: 2, repeat: Infinity }}
+          className="mt-10 grid sm:grid-cols-3 gap-3"
+          initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.2 }}
         >
-          {slipDropped ? 'SLIP COLLECTED • Simulated vote recorded' : showSlip ? 'Reviewing slip...' : 'SEALED BOX'}
-        </motion.span>
-
-        {/* Drop Animation */}
-        {showSlip && !slipDropped && (
-          <motion.div
-            className="absolute bottom-2 left-1/2 -translate-x-1/2 w-1 h-4 bg-white/40 rounded-full"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 16 }}
-            transition={{ delay: 0.5, duration: 0.3 }}
-          />
-        )}
-
-        {slipDropped && (
-          <motion.div
-            className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2 h-2 bg-green-400 rounded-full"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.3 }}
-          />
-        )}
-      </motion.div>
-
-      {/* Connection Point */}
-      <motion.div
-        className="absolute -left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center border-2 border-white/20"
-        animate={showSlip ? {
-          boxShadow: ['0 0 10px rgba(168, 85, 247, 0.5)', '0 0 20px rgba(6, 182, 212, 0.5)']
-        } : { opacity: 0.3 }}
-        transition={{ duration: 1, repeat: Infinity }}
-      >
-        <motion.span
-          className="text-white text-lg"
-          animate={showSlip ? { scale: [1, 1.1, 1] } : {}}
-          transition={{ duration: 1, repeat: Infinity }}
-        >
-          ←
-        </motion.span>
-      </motion.div>
-
-      {/* Corner Accents */}
-      <div className="absolute -top-1 -left-1 w-3 h-3 border-l-2 border-t-2 border-cyan-500/30 rounded-br" />
-      <div className="absolute -bottom-1 -left-1 w-3 h-3 border-l-2 border-b-2 border-cyan-500/30 rounded-tr" />
-      <div className="absolute -top-1 -right-1 w-3 h-3 border-r-2 border-t-2 border-purple-500/30 rounded-bl" />
-      <div className="absolute -bottom-1 -right-1 w-3 h-3 border-r-2 border-b-2 border-purple-500/30 rounded-tl" />
-    </motion.div>
-  );
-};
-
-// Animated Signal Line
-const SignalLine = ({ fromColor, toColor, isActive }) => (
-  <motion.div
-    className="relative h-1 flex-1 mx-4"
-    animate={isActive ? { opacity: [0.3, 0.8, 0.3] } : { opacity: 0.1 }}
-    transition={{ duration: 1.5, repeat: Infinity }}
-  >
-    <motion.div
-      className="absolute inset-0 rounded-full"
-      style={{
-        background: `linear-gradient(90deg, ${fromColor}, ${toColor})`,
-      }}
-      animate={isActive ? { scaleX: [0.5, 1, 0.5] } : {}}
-      transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-    />
-    <motion.div
-      className="absolute inset-0"
-      style={{
-        background: `linear-gradient(90deg, ${fromColor}/40, ${toColor}/40)`,
-      }}
-      animate={isActive ? { x: ['-100%', '100%'] } : {}}
-      transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-    />
-  </motion.div>
-);
-
-// Step Progress Component
-const StepProgress = ({ currentStep, totalSteps, stepTitle, description, instruction }) => (
-  <motion.div
-    className="text-center mb-8"
-    initial={{ opacity: 0, y: -20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5 }}
-  >
-    <motion.span
-      className="inline-block px-4 py-1.5 bg-white/5 backdrop-blur-md rounded-full text-sm font-medium text-purple-300 border border-purple-500/20 mb-4"
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay: 0.2 }}
-    >
-      Step {currentStep} of {totalSteps}
-    </motion.span>
-
-    <motion.h3
-      className="text-2xl font-bold text-white mb-2"
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.3 }}
-    >
-      {stepTitle}
-    </motion.h3>
-
-    <motion.p
-      className="text-gray-400"
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.4 }}
-    >
-      {description}
-    </motion.p>
-
-    {instruction && (
-      <motion.div
-        className="mt-4 p-3 bg-cyan-500/5 border border-cyan-500/20 rounded-lg"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-      >
-        <span className="text-cyan-300 text-sm">💡 {instruction}</span>
-      </motion.div>
-    )}
-  </motion.div>
-);
-
-// Voting Demo Section Component
-const VotingDemoSection = () => {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [selectedCandidate, setSelectedCandidate] = useState(null);
-  const [isCompleted, setIsCompleted] = useState(false);
-  const [isBallotEnabled, setIsBallotEnabled] = useState(false);
-
-  // State derived from current step
-  const isControlReady = currentStep >= 1;
-  const isBallotActive = currentStep >= 3 && isBallotEnabled;
-  const isVoteRecorded = currentStep >= 4;
-
-  const handleVerifyVoter = () => {
-    // Step 1: Verify voter - move to step 2
-    setCurrentStep(2);
-  };
-
-  const handleActivateBallot = () => {
-    // Step 2: Activate ballot - enable ballot unit and move to step 3
-    setIsBallotEnabled(true);
-    setCurrentStep(3);
-  };
-
-  const handleSelectCandidate = (candidate) => {
-    // Step 3: Select candidate
-    setSelectedCandidate(candidate);
-    // Move to step 4 after a short delay
-    setTimeout(() => {
-      setCurrentStep(4);
-    }, 500);
-  };
-
-  const handleConfirmVote = () => {
-    // Step 4: Confirm vote - complete demo
-    setIsCompleted(true);
-  };
-
-  const handleRestart = () => {
-    setCurrentStep(1);
-    setSelectedCandidate(null);
-    setIsCompleted(false);
-    setIsBallotEnabled(false);
-  };
-
-  // Get current step instruction
-  const getCurrentInstruction = () => {
-    switch (currentStep) {
-      case 1:
-        return 'Click "Verify Voter" on the Control Unit to start';
-      case 2:
-        return 'Click "Activate Ballot" on the Control Unit to enable voting';
-      case 3:
-        return 'Select a candidate from the Ballot Unit';
-      case 4:
-        return 'Review the slip in VVPAT, then confirm your vote';
-      default:
-        return '';
-    }
-  };
-
-  // Container animation
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1, delayChildren: 0.2 },
-    },
-  };
-
-  return (
-    <section id="voting-demo" className="relative py-24 w-full bg-gradient-to-br from-[#0a0a0f] via-[#0d0d15] to-[#0a0a0f]">
-      {/* Background Elements */}
-      <div className="absolute inset-0 overflow-hidden -z-10">
-        {/* Cyber Grid */}
-        <div className="absolute inset-0 cyber-grid opacity-20" />
-
-        {/* Animated gradient orbs */}
-        <motion.div
-          className="absolute top-1/4 left-1/4 w-72 h-72 bg-purple-600/10 rounded-full blur-3xl"
-          animate={{
-            x: [0, 50, 0],
-            y: [0, -30, 0],
-            opacity: [0.1, 0.2, 0.1],
-          }}
-          transition={{ duration: 8, ease: "easeInOut", repeat: Infinity, repeatType: "loop" }}
-        />
-
-        <motion.div
-          className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"
-          animate={{
-            x: [0, -40, 0],
-            y: [0, 40, 0],
-            opacity: [0.05, 0.15, 0.05],
-          }}
-          transition={{ duration: 10, ease: "easeInOut", repeat: Infinity, repeatType: "loop" }}
-        />
-
-        {/* Floating particles */}
-        {[...Array(15)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-1 h-1 bg-white/30 rounded-full"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${20 + Math.random() * 80}%`,
-            }}
-            animate={{
-              y: [0, -100 - Math.random() * 100],
-              opacity: [0.3, 0, 0.3],
-              scale: [1, 0.5, 1],
-            }}
-            transition={{
-              duration: 5 + Math.random() * 10,
-              ease: "linear",
-              repeat: Infinity,
-              repeatType: "loop",
-              delay: Math.random() * 5,
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Main Container */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
-        <motion.div
-          className="text-center mb-16"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          <motion.span
-            className="inline-block px-4 py-1.5 bg-white/5 backdrop-blur-md rounded-full text-sm font-medium text-cyan-300 border border-cyan-500/20 mb-6"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2 }}
-          >
-            Interactive Demo
-          </motion.span>
-
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-200 to-white">
-              Experience the Voting Process
-            </span>
-          </h2>
-
-          <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto">
-            See what happens from voter verification to vote confirmation in a simple interactive flow.
-          </p>
+          {[
+            { Icon: Lock, text: 'Vote locks the instant you press a candidate button — cannot be undone or changed', color: 'text-cyber-cyan' },
+            { Icon: Timer, text: 'VVPAT shows your slip for 7 seconds before it drops into a tamper-proof sealed box', color: 'text-cyber-amber' },
+            { Icon: ShieldCheck, text: 'Max 4 votes per minute — rapid fake-voting is physically rate-limited by hardware', color: 'text-cyber-emerald' },
+          ].map(({ Icon, text, color }) => (
+            <div key={text} className="flex items-start gap-3 px-4 py-3 rounded-xl bg-bg-1 border border-white/[0.06]">
+              <Icon size={15} className={`${color} flex-shrink-0 mt-0.5`} />
+              <p className="text-xs text-gray-500 leading-relaxed">{text}</p>
+            </div>
+          ))}
         </motion.div>
-
-        {/* EVM System Layout */}
-        <motion.div
-          className="relative flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-12 mb-16"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          {/* Control Unit - Left */}
-          <motion.div
-            className="z-10"
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
-            <ControlUnit
-              currentStep={currentStep}
-              onVerify={handleVerifyVoter}
-              onActivate={handleActivateBallot}
-              isBallotEnabled={isBallotEnabled}
-            />
-          </motion.div>
-
-          {/* Signal Line: Control -> Ballot */}
-          <motion.div
-            className="hidden lg:flex items-center"
-            initial={{ opacity: 0, scaleX: 0 }}
-            animate={{ opacity: 1, scaleX: 1 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-          >
-            <SignalLine
-              fromColor="rgba(168, 85, 247, 0.6)"
-              toColor="rgba(6, 182, 212, 0.6)"
-              isActive={isBallotEnabled}
-            />
-          </motion.div>
-
-          {/* Ballot Unit - Center */}
-          <motion.div
-            className="z-10"
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-          >
-            <BallotUnit
-              isActive={isBallotActive}
-              selectedCandidate={selectedCandidate}
-              onSelectCandidate={handleSelectCandidate}
-              currentStep={currentStep}
-            />
-          </motion.div>
-
-          {/* Signal Line: Ballot -> VVPAT */}
-          <motion.div
-            className="hidden lg:flex items-center"
-            initial={{ opacity: 0, scaleX: 0 }}
-            animate={{ opacity: 1, scaleX: 1 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-          >
-            <SignalLine
-              fromColor="rgba(6, 182, 212, 0.6)"
-              toColor="rgba(168, 85, 247, 0.6)"
-              isActive={selectedCandidate !== null}
-            />
-          </motion.div>
-
-          {/* VVPAT - Right */}
-          <motion.div
-            className="z-10"
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-          >
-            <VVPAT
-              selectedCandidate={selectedCandidate}
-              currentStep={currentStep}
-            />
-          </motion.div>
-        </motion.div>
-
-        {/* Step Progress and Navigation */}
-        <motion.div
-          className="max-w-2xl mx-auto"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.8 }}
-        >
-          {/* Step Progress */}
-          <StepProgress
-            currentStep={currentStep}
-            totalSteps={4}
-            stepTitle={steps.find(s => s.id === currentStep)?.title || ''}
-            description={steps.find(s => s.id === currentStep)?.description || ''}
-            instruction={getCurrentInstruction()}
-          />
-
-          {/* Confirm Button - Only show on step 4 */}
-          <div className="text-center">
-            {currentStep === 4 && !isCompleted && (
-              <motion.button
-                onClick={handleConfirmVote}
-                className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-green-500 to-cyan-500 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 glassmorphism"
-                whileHover={{ scale: 1.02, y: -2 }}
-                whileTap={{ scale: 0.98, y: 1 }}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5, duration: 0.5 }}
-              >
-                <span>Confirm Vote</span>
-                <motion.span className="ml-2" animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 1, repeat: Infinity }}>
-                  ✓
-                </motion.span>
-              </motion.button>
-            )}
-          </div>
-        </motion.div>
-
-        {/* Completion State */}
-        <AnimatePresence>
-          {isCompleted && (
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -30 }}
-              className="mt-12 text-center"
-            >
-              <motion.div
-                className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-r from-green-500/20 to-cyan-500/20 shadow-2xl mb-6 border border-green-400/20"
-                animate={{ scale: [1, 1.05, 1] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-              >
-                <motion.span
-                  className="text-4xl text-green-400"
-                  animate={{ scale: [1, 1.1, 1] }}
-                  transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                >
-                  ✓
-                </motion.span>
-              </motion.div>
-
-              <h3 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-cyan-400 mb-4">
-                Demo Complete!
-              </h3>
-
-              <p className="text-lg text-gray-300 mb-8">
-                You've successfully experienced the simplified voting process simulation.
-              </p>
-
-              <motion.button
-                onClick={handleRestart}
-                className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-purple-600 to-cyan-500 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 glassmorphism btn-cyber"
-                whileHover={{ scale: 1.02, y: -2 }}
-                whileTap={{ scale: 0.98, y: 1 }}
-              >
-                <span>Restart Demo</span>
-                <motion.span className="ml-2" animate={{ rotate: [0, 360] }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}>
-                  ↻
-                </motion.span>
-              </motion.button>
-
-              <p className="mt-6 text-sm text-gray-500">
-                Interactive concept demo — simplified for education, not an exact replica.
-              </p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Decorative Elements */}
-        <motion.div
-          className="absolute bottom-8 left-8 w-32 h-1 bg-gradient-to-r from-purple-500/0 via-purple-500/40 to-transparent"
-          animate={{ opacity: [0.3, 0.7, 0.3] }}
-          transition={{ duration: 3, repeat: Infinity }}
-        />
-        <motion.div
-          className="absolute bottom-8 right-8 w-32 h-1 bg-gradient-to-l from-cyan-500/0 via-cyan-500/40 to-transparent"
-          animate={{ opacity: [0.3, 0.7, 0.3] }}
-          transition={{ duration: 3, repeat: Infinity, delay: 1 }}
-        />
       </div>
     </section>
   );

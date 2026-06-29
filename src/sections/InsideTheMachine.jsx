@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { motion, useInView } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import { motion, AnimatePresence, useInView } from 'framer-motion';
+import { ArrowRight, ClipboardList, Cpu, Eye, User, BadgeCheck, KeyRound, CheckSquare, Database, Check, Lock, ListChecks, Search, BarChart3, Plus, X } from 'lucide-react';
 
 const MachineModule = ({
   name,
@@ -11,99 +11,84 @@ const MachineModule = ({
   color,
   onClick,
   isActive,
-  icon
+  Icon,
 }) => {
   const moduleRef = useRef(null);
-  const isInView = useInView(moduleRef, { once: false, margin: '-100px' });
+  const isInView = useInView(moduleRef, { once: true, margin: '-60px' });
 
   return (
     <motion.div
       ref={moduleRef}
-      className="relative"
-      initial={{ opacity: 0, y: 40, scale: 0.95 }}
-      animate={isInView ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 40, scale: 0.95 }}
-      transition={{ duration: 0.6 }}
+      initial={{ opacity: 0, y: 24, filter: 'blur(4px)' }}
+      animate={isInView ? { opacity: 1, y: 0, filter: 'blur(0px)' } : {}}
+      transition={{ duration: 0.55, ease: [0.23, 1, 0.32, 1] }}
     >
       <motion.div
-        className="relative w-full max-w-sm min-h-[380px] rounded-2xl border border-white/10 p-7 cursor-pointer overflow-hidden bg-[#111827]/70 backdrop-blur-xl"
+        className="relative w-full rounded-2xl border border-white/8 p-6 cursor-pointer overflow-hidden bg-bg-1"
         onClick={() => onClick(name)}
-        whileHover={{ y: -6, scale: 1.02, borderColor: 'rgba(6,182,212,0.45)' }}
+        style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.4)' }}
+        whileHover={{
+          y: -4,
+          borderColor: `${color}40`,
+          boxShadow: `0 8px 32px rgba(0,0,0,0.5), 0 0 24px ${color}18`,
+          transition: { duration: 0.2, ease: [0.23, 1, 0.32, 1] },
+        }}
       >
-        <motion.div
-          className="absolute inset-0 rounded-2xl"
-          style={{
-            background: `radial-gradient(circle at top, ${color}22, transparent 65%)`
-          }}
-          animate={isActive ? { opacity: [0.45, 0.9, 0.45] } : { opacity: 0.35 }}
-          transition={{ duration: 2, repeat: Infinity }}
-        />
+        {/* Subtle top gradient */}
+        <div className="absolute inset-x-0 top-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${color}30, transparent)` }} />
 
         <div className="relative z-10">
-          <div className="flex items-center justify-between gap-4 mb-5">
+          {/* Header */}
+          <div className="flex items-start justify-between mb-5">
             <div className="flex items-center gap-3">
-              <motion.div
-                className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center border border-white/15"
-                whileHover={{ rotate: [0, 6, -6, 0] }}
+              <div
+                className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: `${color}14`, border: `1px solid ${color}25` }}
               >
-                <span className="text-2xl">{icon}</span>
-              </motion.div>
-
-              <h3 className="text-xl font-bold text-white" style={{ color }}>
-                {name}
-              </h3>
+                <Icon size={20} style={{ color }} />
+              </div>
+              <div>
+                <h3 className="text-base font-semibold text-white" style={{ color }}>
+                  {name}
+                </h3>
+              </div>
             </div>
-
             <motion.div
-              className="w-3 h-3 rounded-full"
-              style={{ backgroundColor: isActive ? color : 'rgba(255,255,255,0.25)' }}
-              animate={
-                isActive
-                  ? {
-                      boxShadow: [`0 0 10px ${color}`, `0 0 22px ${color}`, `0 0 10px ${color}`],
-                      scale: [1, 1.2, 1]
-                    }
-                  : {}
-              }
-              transition={{ duration: 1.3, repeat: Infinity }}
+              className="w-2 h-2 rounded-full mt-1 flex-shrink-0"
+              style={{ backgroundColor: isActive ? color : 'rgba(255,255,255,0.2)' }}
+              animate={isActive ? { boxShadow: [`0 0 8px ${color}`, `0 0 16px ${color}`, `0 0 8px ${color}`] } : {}}
+              transition={{ duration: 1.5, repeat: Infinity }}
             />
           </div>
-
-          <div className="h-px w-full bg-gradient-to-r from-transparent via-white/20 to-transparent mb-5" />
 
           <p className="text-sm text-gray-400 leading-relaxed mb-5">
             {description}
           </p>
 
-          <div className="space-y-3">
-            <div className="rounded-xl bg-cyan-500/5 border border-cyan-400/10 p-3">
-              <p className="text-xs text-cyan-300 font-semibold mb-1">Input</p>
-              <p className="text-xs text-gray-300 leading-relaxed">{inputs}</p>
-            </div>
-
-            <div className="rounded-xl bg-purple-500/5 border border-purple-400/10 p-3">
-              <p className="text-xs text-purple-300 font-semibold mb-1">Output</p>
-              <p className="text-xs text-gray-300 leading-relaxed">{outputs}</p>
-            </div>
-
-            <div className="rounded-xl bg-green-500/5 border border-green-400/10 p-3">
-              <p className="text-xs text-green-300 font-semibold mb-1">Purpose</p>
-              <p className="text-xs text-gray-300 leading-relaxed">{purpose}</p>
-            </div>
+          {/* Data pills */}
+          <div className="space-y-2">
+            {[
+              { label: 'Input', value: inputs, tc: 'text-cyber-cyan' },
+              { label: 'Output', value: outputs, tc: 'text-cyber-violet' },
+              { label: 'Purpose', value: purpose, tc: 'text-cyber-emerald' },
+            ].map(({ label, value, tc }) => (
+              <div key={label} className="flex items-baseline gap-2 px-3 py-2 rounded-lg bg-white/[0.035] border border-white/[0.06]">
+                <span className={`text-[10px] font-semibold uppercase tracking-widest ${tc} flex-shrink-0`}>{label}</span>
+                <span className="text-xs text-gray-400">{value}</span>
+              </div>
+            ))}
           </div>
         </div>
-
-        <div className="absolute -top-1 -left-1 w-4 h-4 border-l-2 border-t-2 border-cyan-500/40 rounded-br" />
-        <div className="absolute -bottom-1 -left-1 w-4 h-4 border-l-2 border-b-2 border-cyan-500/40 rounded-tr" />
-        <div className="absolute -top-1 -right-1 w-4 h-4 border-r-2 border-t-2 border-purple-500/40 rounded-bl" />
-        <div className="absolute -bottom-1 -right-1 w-4 h-4 border-r-2 border-b-2 border-purple-500/40 rounded-tl" />
       </motion.div>
     </motion.div>
   );
 };
 
+const EASE_OUT = [0.23, 1, 0.32, 1];
+
 const MachineAnatomy = ({ activeModule, onModuleClick }) => {
   const containerRef = useRef(null);
-  const isInView = useInView(containerRef, { once: false, margin: '-100px' });
+  const isInView = useInView(containerRef, { once: true, margin: '-80px' });
 
   const modules = [
     {
@@ -112,8 +97,8 @@ const MachineAnatomy = ({ activeModule, onModuleClick }) => {
       inputs: 'Voter interaction',
       outputs: 'Vote selection data',
       purpose: 'Capture voter choice',
-      color: 'rgba(6, 182, 212, 1)',
-      icon: '🗳️'
+      color: 'rgba(34,211,238,1)',
+      Icon: ClipboardList,
     },
     {
       name: 'Control Unit',
@@ -121,8 +106,8 @@ const MachineAnatomy = ({ activeModule, onModuleClick }) => {
       inputs: 'Officer activation',
       outputs: 'Ballot enable signal',
       purpose: 'Control one voting session',
-      color: 'rgba(168, 85, 247, 1)',
-      icon: '🎛️'
+      color: 'rgba(167,139,250,1)',
+      Icon: Cpu,
     },
     {
       name: 'Verification Window',
@@ -130,88 +115,92 @@ const MachineAnatomy = ({ activeModule, onModuleClick }) => {
       inputs: 'Selected vote data',
       outputs: 'Verification display',
       purpose: 'Support transparent verification',
-      color: 'rgba(16, 185, 129, 1)',
-      icon: '👁️'
-    }
+      color: 'rgba(52,211,153,1)',
+      Icon: Eye,
+    },
   ];
 
   return (
-    <motion.div
-      ref={containerRef}
-      className="relative w-full py-16"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: isInView ? 1 : 0 }}
-      transition={{ duration: 0.6 }}
-    >
-      <motion.div className="text-center mb-12">
-        <span className="inline-block px-4 py-1.5 bg-white/5 backdrop-blur-md rounded-full text-sm font-medium text-cyan-300 border border-cyan-500/20 mb-4">
+    <div ref={containerRef} className="relative w-full py-12">
+      <motion.div
+        className="text-center mb-12"
+        initial={{ opacity: 0, y: 20, filter: 'blur(4px)' }}
+        animate={isInView ? { opacity: 1, y: 0, filter: 'blur(0px)' } : {}}
+        transition={{ duration: 0.55, ease: EASE_OUT }}
+      >
+        <span className="badge badge-cyan mb-4">
           Interactive System Diagram
         </span>
 
-        <h2 className="text-4xl md:text-5xl font-bold text-white">
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-white to-purple-400">
+        <h2 className="text-h1 text-white mt-4">
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-white to-violet-400">
             Machine Anatomy
           </span>
         </h2>
 
-        <p className="text-lg text-gray-400 mt-4 max-w-2xl mx-auto">
+        <p className="text-body-lg text-slate-400 mt-4 max-w-2xl mx-auto">
           Explore the three main components of a simplified EVM-style voting system.
         </p>
       </motion.div>
 
       <div className="relative max-w-7xl mx-auto px-4">
-        <div className="absolute hidden lg:block top-1/2 left-[20%] right-[20%] h-px bg-gradient-to-r from-cyan-400/20 via-purple-400/30 to-green-400/20 -z-10" />
+        <div className="absolute hidden lg:block top-1/2 left-[20%] right-[20%] h-px bg-gradient-to-r from-cyan-400/15 via-violet-400/20 to-emerald-400/15 -z-10" />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {modules.map((module) => (
-            <MachineModule
+          {modules.map((module, i) => (
+            <motion.div
               key={module.name}
-              {...module}
-              onClick={onModuleClick}
-              isActive={activeModule === module.name}
-            />
+              initial={{ opacity: 0, y: 24, filter: 'blur(4px)' }}
+              animate={isInView ? { opacity: 1, y: 0, filter: 'blur(0px)' } : {}}
+              transition={{ duration: 0.55, ease: EASE_OUT, delay: i * 0.08 }}
+            >
+              <MachineModule
+                {...module}
+                onClick={onModuleClick}
+                isActive={activeModule === module.name}
+              />
+            </motion.div>
           ))}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
 const VoteJourneyVisualization = () => {
   const containerRef = useRef(null);
-  const isInView = useInView(containerRef, { once: false, margin: '-100px' });
+  const isInView = useInView(containerRef, { once: true, margin: '-80px' });
 
   const stages = [
-    { id: 1, name: 'Voter', description: 'Voter arrives at polling station', icon: '👤' },
-    { id: 2, name: 'Verification', description: 'Identity verification process', icon: '🆔' },
-    { id: 3, name: 'Activation', description: 'Ballot activated by officer', icon: '🔑' },
-    { id: 4, name: 'Candidate Selection', description: 'Voter selects their choice', icon: '✅' },
-    { id: 5, name: 'Recording', description: 'Vote recorded securely', icon: '💾' },
-    { id: 6, name: 'Verification Slip', description: 'Voter verifies their vote', icon: '👀' },
-    { id: 7, name: 'Completion', description: 'Vote casting complete', icon: '✓' }
+    { id: 1, name: 'Voter', description: 'Voter arrives at polling station', Icon: User, color: 'rgba(34,211,238,1)' },
+    { id: 2, name: 'Verification', description: 'Identity verification process', Icon: BadgeCheck, color: 'rgba(167,139,250,1)' },
+    { id: 3, name: 'Activation', description: 'Ballot activated by officer', Icon: KeyRound, color: 'rgba(251,191,36,1)' },
+    { id: 4, name: 'Candidate Selection', description: 'Voter selects their choice', Icon: CheckSquare, color: 'rgba(52,211,153,1)' },
+    { id: 5, name: 'Recording', description: 'Vote recorded securely', Icon: Database, color: 'rgba(34,211,238,1)' },
+    { id: 6, name: 'Verification Slip', description: 'Voter verifies their vote', Icon: Eye, color: 'rgba(167,139,250,1)' },
+    { id: 7, name: 'Completion', description: 'Vote casting complete', Icon: Check, color: 'rgba(52,211,153,1)' },
   ];
 
   return (
-    <motion.div
-      ref={containerRef}
-      className="relative w-full py-16"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: isInView ? 1 : 0 }}
-      transition={{ duration: 0.6 }}
-    >
+    <div ref={containerRef} className="relative w-full py-12">
       <div className="max-w-7xl mx-auto px-4">
-        <motion.div className="text-center mb-14">
-          <span className="inline-block px-4 py-1.5 bg-white/5 backdrop-blur-md rounded-full text-sm font-medium text-purple-300 border border-purple-500/20 mb-4">
+        <motion.div
+          className="text-center mb-14"
+          initial={{ opacity: 0, y: 20, filter: 'blur(4px)' }}
+          animate={isInView ? { opacity: 1, y: 0, filter: 'blur(0px)' } : {}}
+          transition={{ duration: 0.55, ease: EASE_OUT }}
+        >
+          <span className="badge badge-violet mb-4">
             Vote Journey
           </span>
 
-          <h2 className="text-4xl md:text-5xl font-bold text-white">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-white to-cyan-400">
+          <h2 className="text-h1 text-white mt-4">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-white to-cyan-400">
               The Vote Journey
             </span>
           </h2>
 
-          <p className="text-lg text-gray-400 mt-4 max-w-2xl mx-auto">
+          <p className="text-body-lg text-slate-400 mt-4 max-w-2xl mx-auto">
             Follow the complete path of a vote from initial contact to final confirmation.
           </p>
         </motion.div>
@@ -222,15 +211,16 @@ const VoteJourneyVisualization = () => {
               <React.Fragment key={stage.id}>
                 <motion.div
                   className="w-36 flex flex-col items-center text-center"
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: isInView ? 1 : 0, y: isInView ? 0 : 30 }}
-                  transition={{ delay: index * 0.08, duration: 0.45 }}
+                  initial={{ opacity: 0, y: 20, filter: 'blur(4px)' }}
+                  animate={isInView ? { opacity: 1, y: 0, filter: 'blur(0px)' } : {}}
+                  transition={{ delay: index * 0.06, duration: 0.45, ease: EASE_OUT }}
                 >
                   <motion.div
-                    className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-purple-500/20 flex items-center justify-center border border-white/20 shadow-lg shadow-cyan-500/10"
+                    className="w-12 h-12 rounded-xl flex items-center justify-center border border-white/12"
+                    style={{ background: `${stage.color}12`, borderColor: `${stage.color}25` }}
                     whileHover={{ scale: 1.08, y: -4 }}
                   >
-                    <span className="text-2xl">{stage.icon}</span>
+                    <stage.Icon size={20} style={{ color: stage.color }} />
                   </motion.div>
 
                   <h4 className="mt-4 text-base font-bold text-white leading-tight min-h-[40px] flex items-center">
@@ -267,112 +257,204 @@ const VoteJourneyVisualization = () => {
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
 const SecurityLayersVisualization = () => {
   const containerRef = useRef(null);
-  const isInView = useInView(containerRef, { once: false, margin: '-100px' });
+  const isInView = useInView(containerRef, { once: true, margin: '-80px' });
   const [expandedLayer, setExpandedLayer] = useState(null);
 
+  // Dark cards with left-border accent — no colorful backgrounds
   const layers = [
     {
       id: 1,
       name: 'Physical Controls',
-      description: 'Hardware-level protections including sealed enclosures, controlled access, and supervised handling.',
-      color: 'from-orange-400 to-red-400',
-      icon: '🔒'
+      description: 'Hardware-level protections including sealed enclosures, tamper-evident seals, controlled access, and supervised handling at every stage — from storage to transport to the polling station.',
+      accentColor: '#fbbf24',          // amber
+      accentGlow: 'rgba(251,191,36,0.12)',
+      borderClass: 'border-l-amber-400',
+      badgeClass: 'bg-amber-400/10 text-amber-300 border-amber-400/25',
+      Icon: Lock,
+      facts: ['Sealed storage', 'Chain of custody', 'Physical witnesses']
     },
     {
       id: 2,
       name: 'Operational Procedures',
-      description: 'Defined workflows for setup, activation, voting, shutdown, and custody of the system.',
-      color: 'from-blue-400 to-cyan-400',
-      icon: '📋'
+      description: 'Strict, documented workflows for every step — machine setup, activation, the voting session, shutdown, and secure custody after polling ends. Multiple officers participate at each stage.',
+      accentColor: '#22d3ee',
+      accentGlow: 'rgba(34,211,238,0.12)',
+      borderClass: 'border-l-cyan-400',
+      badgeClass: 'bg-cyan-400/10 text-cyan-300 border-cyan-400/25',
+      Icon: ListChecks,
+      facts: ['Multi-officer sign-off', 'Mock polling required', 'Documented steps']
     },
     {
       id: 3,
       name: 'Verification Mechanisms',
-      description: 'Processes that help confirm the voter choice and support transparent verification.',
-      color: 'from-green-400 to-emerald-400',
-      icon: '🔍'
+      description: 'VVPAT prints a paper slip for every vote cast. The voter can see it through a transparent window for 7 seconds before it drops into a sealed box — an observable, physical record separate from the electronic count.',
+      accentColor: '#34d399',
+      accentGlow: 'rgba(52,211,153,0.12)',
+      borderClass: 'border-l-emerald-400',
+      badgeClass: 'bg-emerald-400/10 text-emerald-300 border-emerald-400/25',
+      Icon: Search,
+      facts: ['VVPAT paper trail', '7-second visual verify', 'Sealed paper box']
     },
     {
       id: 4,
       name: 'Audit Processes',
-      description: 'Post-process verification, audit trails, and review procedures that help validate outcomes.',
-      color: 'from-purple-400 to-pink-400',
-      icon: '📊'
+      description: 'Post-election verification, random VVPAT audits, count cross-checking, and formal review procedures allow election authorities and candidates to challenge and verify final results.',
+      accentColor: '#a78bfa',
+      accentGlow: 'rgba(167,139,250,0.12)',
+      borderClass: 'border-l-violet-400',
+      badgeClass: 'bg-violet-400/10 text-violet-300 border-violet-400/25',
+      Icon: BarChart3,
+      facts: ['Random VVPAT audits', 'Cross-candidate observers', 'Dispute procedures']
     }
   ];
 
   return (
-    <motion.div
-      ref={containerRef}
-      className="relative w-full py-16"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: isInView ? 1 : 0 }}
-      transition={{ duration: 0.6 }}
-    >
-      <div className="max-w-6xl mx-auto px-4">
-        <motion.div className="text-center mb-12">
-          <span className="inline-block px-4 py-1.5 bg-white/5 backdrop-blur-md rounded-full text-sm font-medium text-green-300 border border-green-500/20 mb-4">
+    <div ref={containerRef} className="relative w-full py-12">
+      <div className="max-w-4xl mx-auto px-4">
+        <motion.div
+          className="text-center mb-12"
+          initial={{ opacity: 0, y: 20, filter: 'blur(4px)' }}
+          animate={isInView ? { opacity: 1, y: 0, filter: 'blur(0px)' } : {}}
+          transition={{ duration: 0.55, ease: EASE_OUT }}
+        >
+          <span className="badge badge-emerald mb-4">
             Security Architecture
           </span>
 
-          <h2 className="text-4xl md:text-5xl font-bold text-white">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-white to-cyan-400">
-              Security Layers
+          <h2 className="text-h1 text-white mt-4">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-white to-cyan-400">
+              Why Hacking Is Harder Than You Think
             </span>
           </h2>
 
-          <p className="text-lg text-gray-400 mt-4 max-w-2xl mx-auto">
-            Multiple layers work together: technology, physical controls, procedures, and verification.
+          <p className="text-body-lg text-slate-400 mt-4 max-w-2xl mx-auto">
+            Security isn't just software. Four independent layers work together — each one alone would not be enough.
           </p>
         </motion.div>
 
-        <div className="space-y-5">
-          {layers.map((layer, index) => (
-            <motion.div
-              key={layer.id}
-              className={`relative w-full max-w-3xl mx-auto rounded-2xl border border-white/10 overflow-hidden bg-white/[0.04] backdrop-blur-xl ${
-                expandedLayer === layer.id ? 'ring-2 ring-cyan-500/30' : ''
-              }`}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: isInView ? 1 : 0, y: isInView ? 0 : 30 }}
-              transition={{ delay: index * 0.1, duration: 0.5 }}
-              onClick={() => setExpandedLayer(expandedLayer === layer.id ? null : layer.id)}
-              whileHover={{ scale: 1.01, borderColor: 'rgba(6,182,212,0.35)' }}
-            >
-              <div className={`flex items-center gap-4 p-6 bg-gradient-to-r ${layer.color} bg-opacity-10`}>
-                <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center border border-white/20">
-                  <span className="text-2xl">{layer.icon}</span>
-                </div>
-
-                <h3 className="text-xl font-bold text-white">
-                  Layer {layer.id}: {layer.name}
-                </h3>
-
-                <div className="ml-auto w-8 h-8 rounded-full bg-white/10 flex items-center justify-center border border-white/15 text-white">
-                  {expandedLayer === layer.id ? '−' : '+'}
-                </div>
-              </div>
-
-              {expandedLayer === layer.id && (
+        <div className="space-y-4">
+          {layers.map((layer, index) => {
+            const isOpen = expandedLayer === layer.id;
+            return (
+              <motion.div
+                key={layer.id}
+                initial={{ opacity: 0, y: 20, filter: 'blur(4px)' }}
+                animate={isInView ? { opacity: 1, y: 0, filter: 'blur(0px)' } : {}}
+                transition={{ delay: index * 0.07, duration: 0.5, ease: EASE_OUT }}
+              >
                 <motion.div
-                  className="p-6 border-t border-white/10"
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
+                  className={`relative w-full rounded-xl overflow-hidden cursor-pointer border-l-[3px] ${layer.borderClass}`}
+                  style={{
+                    background: isOpen
+                      ? `linear-gradient(135deg, ${layer.accentGlow}, rgba(18,18,31,0.95))`
+                      : 'rgba(18,18,31,0.8)',
+                    boxShadow: isOpen
+                      ? `0 0 0 1px rgba(255,255,255,0.08), 0 0 24px ${layer.accentGlow}, 0 4px 20px rgba(0,0,0,0.5)`
+                      : '0 0 0 1px rgba(255,255,255,0.05), 0 4px 20px rgba(0,0,0,0.4)',
+                  }}
+                  onClick={() => setExpandedLayer(isOpen ? null : layer.id)}
+                  whileHover={{ x: 2, transition: { duration: 0.15, ease: [0.23,1,0.32,1] } }}
+                  whileTap={{ scale: 0.99, transition: { duration: 0.1 } }}
+                  layout
+                  transition={{ layout: { duration: 0.35, ease: [0.23,1,0.32,1] } }}
                 >
-                  <p className="text-gray-300 leading-relaxed">{layer.description}</p>
+                  {/* Header row */}
+                  <div className="flex items-center gap-4 p-5">
+                    <div
+                      className="w-11 h-11 rounded-lg flex items-center justify-center flex-shrink-0"
+                      style={{ background: layer.accentGlow, border: `1px solid ${layer.accentColor}30` }}
+                    >
+                      <layer.Icon size={18} style={{ color: layer.accentColor }} />
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3">
+                        <span className={`text-xs font-mono px-2 py-0.5 rounded-full border ${layer.badgeClass}`}>
+                          Layer {layer.id}
+                        </span>
+                        <h3 className="text-base font-semibold text-white">{layer.name}</h3>
+                      </div>
+
+                      {/* Inline facts — visible when collapsed */}
+                      {!isOpen && (
+                        <motion.div
+                          className="flex gap-3 mt-1.5"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          {layer.facts.map((fact) => (
+                            <span key={fact} className="text-xs text-slate-500">{fact}</span>
+                          ))}
+                        </motion.div>
+                      )}
+                    </div>
+
+                    <motion.div
+                      className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 flex-shrink-0"
+                      style={{ background: 'rgba(255,255,255,0.05)' }}
+                      animate={{ rotate: isOpen ? 45 : 0 }}
+                      transition={{ duration: 0.25, ease: [0.23,1,0.32,1] }}
+                    >
+                      <Plus size={14} />
+                    </motion.div>
+                  </div>
+
+                  {/* Expanded content */}
+                  <AnimatePresence initial={false}>
+                    {isOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0, transition: { duration: 0.2, ease: 'easeIn' } }}
+                        transition={{ duration: 0.35, ease: [0.23,1,0.32,1] }}
+                        className="overflow-hidden"
+                      >
+                        <div className="px-5 pb-5 pt-0 border-t border-white/[0.06]">
+                          <p className="text-slate-300 text-sm leading-relaxed mt-4">
+                            {layer.description}
+                          </p>
+                          <div className="flex flex-wrap gap-2 mt-4">
+                            {layer.facts.map((fact) => (
+                              <span
+                                key={fact}
+                                className={`text-xs px-3 py-1 rounded-full border ${layer.badgeClass}`}
+                              >
+                                ✓ {fact}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </motion.div>
-              )}
-            </motion.div>
-          ))}
+              </motion.div>
+            );
+          })}
         </div>
+
+        {/* Bottom callout */}
+        <motion.div
+          className="mt-8 p-5 rounded-xl text-center"
+          style={{ background: 'rgba(34,211,238,0.04)', border: '1px solid rgba(34,211,238,0.12)' }}
+          initial={{ opacity: 0, y: 16 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ delay: 0.5, duration: 0.5, ease: EASE_OUT }}
+        >
+          <p className="text-slate-300 text-sm">
+            <span className="text-cyan-400 font-semibold">All four layers are independent.</span>{' '}
+            Bypassing one doesn't neutralize the others — each catches what the others miss.
+          </p>
+        </motion.div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
@@ -517,59 +599,50 @@ const InsideTheMachine = () => {
         />
       </div>
 
-      <div className="relative z-10">
-        <motion.div
-          className="text-center py-16 px-4"
-          initial={{ opacity: 0, y: -30 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <span className="inline-block px-4 py-1.5 bg-white/5 backdrop-blur-md rounded-full text-sm font-medium text-purple-300 border border-purple-500/20 mb-6">
-            Interactive Educational Visualization
-          </span>
-
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-white to-cyan-400">
-              Inside The Machine
-            </span>
-          </h2>
-
-          <p className="text-lg md:text-xl text-gray-300 max-w-4xl mx-auto leading-relaxed">
-            Educational concept visualization. This is not an exact replica of any real election system.
-            All explanations are neutral and educational.
-          </p>
-        </motion.div>
+      <div className="relative z-10 pt-16">
 
         {activeModule && (
           <motion.div
-            className="fixed top-20 left-1/2 -translate-x-1/2 w-[92%] max-w-2xl z-50"
-            initial={{ opacity: 0, y: -40 }}
-            animate={{ opacity: 1, y: 0 }}
+            className="fixed inset-0 z-50 flex items-start justify-center pt-24 px-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
           >
-            <div className="rounded-2xl bg-[#101827]/95 backdrop-blur-xl border border-white/20 shadow-2xl overflow-hidden">
-              <div className="p-6 border-b border-white/10 flex items-center justify-between">
-                <h3 className="text-xl font-bold text-white">{activeModule}</h3>
+            {/* Backdrop */}
+            <div
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+              onClick={() => setActiveModule(null)}
+            />
+            <motion.div
+              className="relative w-full max-w-2xl"
+              initial={{ y: -40, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 28 }}
+            >
+              <div className="rounded-2xl bg-[#101827]/95 backdrop-blur-xl border border-white/20 shadow-2xl overflow-hidden">
+                <div className="p-6 border-b border-white/10 flex items-center justify-between">
+                  <h3 className="text-xl font-bold text-white">{activeModule}</h3>
 
-                <button
-                  onClick={() => setActiveModule(null)}
-                  className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center border border-white/20 hover:bg-white/20"
-                >
-                  ×
-                </button>
+                  <button
+                    onClick={() => setActiveModule(null)}
+                    className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center border border-white/20 hover:bg-white/20 text-white"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+
+                <div className="p-6">
+                  <p className="text-gray-300 leading-relaxed">
+                    {activeModule === 'Ballot Unit' &&
+                      'The Ballot Unit is the voter-facing component where selections are made in this simplified educational model.'}
+                    {activeModule === 'Control Unit' &&
+                      'The Control Unit manages ballot activation and controls one voting session in this simplified educational model.'}
+                    {activeModule === 'Verification Window' &&
+                      'The Verification Window shows a VVPAT-style confirmation concept for educational understanding.'}
+                  </p>
+                </div>
               </div>
-
-              <div className="p-6">
-                <p className="text-gray-300 leading-relaxed">
-                  {activeModule === 'Ballot Unit' &&
-                    'The Ballot Unit is the voter-facing component where selections are made in this simplified educational model.'}
-
-                  {activeModule === 'Control Unit' &&
-                    'The Control Unit manages ballot activation and controls one voting session in this simplified educational model.'}
-
-                  {activeModule === 'Verification Window' &&
-                    'The Verification Window shows a VVPAT-style confirmation concept for educational understanding.'}
-                </p>
-              </div>
-            </div>
+            </motion.div>
           </motion.div>
         )}
 

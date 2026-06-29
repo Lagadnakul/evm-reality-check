@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 const CodeBlock = ({ code, language = 'python', hasErrors = false, showLineNumbers = true }) => {
@@ -18,9 +18,7 @@ const CodeBlock = ({ code, language = 'python', hasErrors = false, showLineNumbe
     }
   }, [typingIndex, code.length, isTypingComplete]);
 
-  const getTokenClass = (line, index) => {
-    return 'text-white';
-  };
+  const getTokenClass = () => 'text-white'; // eslint-disable-line no-unused-vars
 
   const errorLines = hasErrors ? [0, 1, 2] : [];
 

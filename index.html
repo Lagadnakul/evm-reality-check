@@ -1,34 +1,200 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-IN">
 <head>
-<meta charset="UTF-8" />
-<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="description" content="EVM Reality Check - Interactive Educational Experience. Explore how electronic voting works, understand common myths, and test the famous 3-syntax-error hacking theory. Built by Nakul Lagad." />
-<meta name="keywords" content="EVM, Electronic Voting Machine, Voting, Democracy, Technology, Education, Security, Hacking, Myth Busters" />
-<meta name="author" content="Nakul Lagad" />
-<meta name="robots" content="index, follow" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<!-- Open Graph / Social Media -->
-<meta property="og:title" content="EVM Reality Check - Interactive Educational Experience" />
-<meta property="og:description" content="Explore how electronic voting works, understand common myths, and test the famous 3-syntax-error hacking theory." />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://evm-reality-check.vercel.app/" />
-<meta property="og:image" content="https://evm-reality-check.vercel.app/og-image.png" />
+  <!-- ═══ Primary SEO ═══════════════════════════════════════════════════════ -->
+  <title>Can You Really Hack An EVM? | EVM Reality Check</title>
+  <meta name="description" content="Interactive educational experience that explains how Electronic Voting Machines (EVMs) work, debunks 4 common myths, and lets you try the viral '3 syntax error' hacking claim yourself. Built by Nakul Lagad." />
+  <meta name="keywords" content="EVM, Electronic Voting Machine, EVM hack, VVPAT, India elections, voting system, ballot unit, control unit, EVM myth, 3 syntax errors EVM, how EVM works, EVM security" />
+  <meta name="author" content="Nakul Lagad" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://evm-reality-check.vercel.app/" />
+  <meta name="theme-color" content="#07070f" />
 
-<!-- Twitter Card -->
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="EVM Reality Check - Interactive Educational Experience" />
-<meta name="twitter:description" content="Explore how electronic voting works, understand common myths, and test the famous 3-syntax-error hacking theory." />
-<meta name="twitter:image" content="https://evm-reality-check.vercel.app/og-image.png" />
+  <!-- ═══ Favicons ══════════════════════════════════════════════════════════ -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest" />
 
-<!-- Theme Color -->
-<meta name="theme-color" content="#0a0a0f" />
+  <!-- ═══ Open Graph / Social Sharing ══════════════════════════════════════ -->
+  <meta property="og:title" content="Can You Really Hack An EVM? | EVM Reality Check" />
+  <meta property="og:description" content="Test the 3-syntax-error theory. Explore how Electronic Voting Machines actually work — interactive, myth-busting, educational." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://evm-reality-check.vercel.app/" />
+  <meta property="og:image" content="https://evm-reality-check.vercel.app/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="EVM Reality Check — Interactive Educational Experience" />
+  <meta property="og:locale" content="en_IN" />
+  <meta property="og:site_name" content="EVM Reality Check" />
 
-<title>EVM Reality Check - Interactive Educational Experience</title>
+  <!-- ═══ Twitter Card ══════════════════════════════════════════════════════ -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@LagadNakul" />
+  <meta name="twitter:title" content="Can You Really Hack An EVM? | EVM Reality Check" />
+  <meta name="twitter:description" content="Interactive educational experience — explore how EVMs work, debunk 4 myths, and try the 3 syntax error hacking challenge." />
+  <meta name="twitter:image" content="https://evm-reality-check.vercel.app/og-image.png" />
+
+  <!-- ═══ Fonts ═════════════════════════════════════════════════════════════ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <!-- ═══ JSON-LD: FAQ (AEO — Answer Engine Optimization) ══════════════════ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Can an EVM be hacked with 3 syntax errors?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. Fixing Python syntax errors on a home computer establishes no connection to an EVM. EVMs operate on isolated, proprietary embedded hardware with no network interface — not a general-purpose computer running Python."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is an EVM connected to the internet or WiFi?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. Indian Electronic Voting Machines are completely air-gapped standalone embedded systems with no WiFi, Bluetooth, cellular, or internet connectivity. They cannot be accessed remotely under any circumstances."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is a VVPAT and how does it work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "VVPAT stands for Voter Verifiable Paper Audit Trail. It is a device attached to the Ballot Unit that prints a paper slip showing the voter's selected candidate. The voter can visually verify this slip for exactly 7 seconds through a transparent window before it drops into a sealed, tamper-proof box — creating an independent physical record separate from the electronic count."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What are the main components of an EVM?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "An EVM has two primary units: (1) the Control Unit, operated by the polling officer to enable exactly one vote at a time, and (2) the Ballot Unit, used by the voter to press their candidate's numbered button. A VVPAT unit is also connected for paper-based vote verification. The vote locks the instant the voter presses a button."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can someone hack an EVM from home using coding skills?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. An EVM is not a networked computer. It runs proprietary one-time-programmable (OTP) firmware on sealed embedded hardware. No programming language, script, or remote tool has any interface, protocol, or physical channel to communicate with an EVM. The firmware cannot be updated even by the manufacturer after manufacture."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How many security layers does an EVM have?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "EVMs are protected by four independent layers: (1) Physical controls — sealed storage, chain of custody, physical witnesses; (2) Operational procedures — multi-officer sign-off, documented steps, mock polling; (3) Verification mechanisms — VVPAT paper trail with 7-second voter viewing window; (4) Audit processes — random VVPAT audits, cross-candidate observers, formal dispute procedures."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does an EVM prevent someone from voting multiple times?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "An EVM's Ballot Unit locks the moment a voter presses any candidate button — it cannot be pressed again. The machine only accepts a maximum of 4 votes per minute (rate-limited by hardware). The polling officer must manually activate the Control Unit for each new voter, and must be physically present at the polling station."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can the EVM firmware be reprogrammed to change votes?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. EVM firmware is burned into One-Time Programmable (OTP) memory chips at the time of manufacture. The code cannot be altered, updated, or overwritten at any point after manufacturing — not even by the manufacturer BEL/ECIL, not by the Election Commission, and not by any external actor."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <!-- ═══ JSON-LD: Article / Educational Content (GEO) ═════════════════════ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "Can You Really Hack An EVM? An Interactive Explanation",
+    "description": "An interactive educational experience explaining Electronic Voting Machine architecture, the 7-step voting process, 4 common myths debunked, and why the '3 syntax errors' hacking claim is factually incorrect.",
+    "image": "https://evm-reality-check.vercel.app/og-image.png",
+    "author": {
+      "@type": "Person",
+      "name": "Nakul Lagad",
+      "url": "https://github.com/Lagadnakul",
+      "jobTitle": "Full Stack + AI Developer",
+      "alumniOf": "M.Tech AI & Data Science"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "EVM Reality Check",
+      "url": "https://evm-reality-check.vercel.app/",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://evm-reality-check.vercel.app/logo.png"
+      }
+    },
+    "url": "https://evm-reality-check.vercel.app/",
+    "datePublished": "2024-01-01",
+    "dateModified": "2026-06-27",
+    "inLanguage": "en-IN",
+    "educationalUse": "General Education",
+    "learningResourceType": "Interactive",
+    "audience": {
+      "@type": "EducationalAudience",
+      "educationalRole": "general public"
+    },
+    "about": [
+      { "@type": "Thing", "name": "Electronic Voting Machine", "sameAs": "https://en.wikipedia.org/wiki/Electronic_voting_machine" },
+      { "@type": "Thing", "name": "VVPAT", "sameAs": "https://en.wikipedia.org/wiki/Voter_verifiable_paper_audit_trail" },
+      { "@type": "Thing", "name": "Election Security" },
+      { "@type": "Thing", "name": "Indian Elections" }
+    ],
+    "keywords": "EVM, Electronic Voting Machine, VVPAT, ballot unit, control unit, EVM security, EVM myth, 3 syntax errors, India elections"
+  }
+  </script>
+
+  <!-- ═══ JSON-LD: WebSite Schema ══════════════════════════════════════════ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "EVM Reality Check",
+    "url": "https://evm-reality-check.vercel.app/",
+    "description": "Interactive educational experience about Electronic Voting Machines — how they work, why they cannot be remotely hacked, and what 4 common myths get wrong.",
+    "inLanguage": "en-IN",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://evm-reality-check.vercel.app/"
+    }
+  }
+  </script>
+
+  <!-- ═══ JSON-LD: BreadcrumbList ══════════════════════════════════════════ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "EVM Reality Check", "item": "https://evm-reality-check.vercel.app/" },
+      { "@type": "ListItem", "position": 2, "name": "Inside The Machine", "item": "https://evm-reality-check.vercel.app/#inside-machine" },
+      { "@type": "ListItem", "position": 3, "name": "Voting Demo", "item": "https://evm-reality-check.vercel.app/#voting-demo" },
+      { "@type": "ListItem", "position": 4, "name": "Myth vs Reality", "item": "https://evm-reality-check.vercel.app/#myth-reality" },
+      { "@type": "ListItem", "position": 5, "name": "Hacker Mode", "item": "https://evm-reality-check.vercel.app/#hacker-mode" }
+    ]
+  }
+  </script>
 </head>
 <body>
-<div id="root"></div>
-<script type="module" src="/src/main.jsx"></script>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
 </body>
 </html>
